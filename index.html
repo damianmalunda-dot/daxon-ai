@@ -399,11 +399,13 @@ textarea{resize:vertical;line-height:1.7;}
         <div id="notes-list-view">
           <div class="card">
             <input type="text" id="notes-search" placeholder="Tafuta notes..." data-i18n-ph="ph_search_notes" onkeyup="renderNotes()" style="margin-bottom:12px;"/>
-            <div class="import-zone" ondrop="dropFile(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)" onclick="triggerFileImport()">
+            <div class="import-zone" onclick="requestPhoneFilesAccess()">
               <div class="import-icon">📂</div>
-              <p data-i18n="drop_files">DROP FILES OR CLICK TO IMPORT</p>
-              <small>PDF • DOCX • PPTX • XLSX • TXT • JSON • CSV • Images</small>
+              <p data-i18n="grant_access">RUHUSU UFIKIAJI WA FAILI ZA SIMU</p>
+              <small data-i18n="grant_access_desc">Baada ya kukubali, hati zote (PDF, DOCX, PPTX, XLSX, TXT, Picha) zilizopo kwenye simu yako zitasomwa na kuonekana moja kwa moja hapa chini kama Notes — na DAXON AI itaweza kuzisoma zote ukiwasha "Notes Context"</small>
             </div>
+            <input type="file" id="phone-files-input" webkitdirectory multiple style="display:none;" onchange="handlePhoneFilesAccess(event)"/>
+            <div id="phone-scan-progress" style="display:none;color:var(--text2);font-family:var(--font-mono);font-size:11px;margin-bottom:10px;"></div>
             <button class="btn btn-full btn-primary" onclick="openNoteEditor()"><span data-i18n="btn_new_note">➕ NOTE MPYA</span></button>
           </div>
           <div id="notes-list"></div>
@@ -702,6 +704,19 @@ textarea{resize:vertical;line-height:1.7;}
 <input type="file" id="sum-voice-input" style="display:none;" accept="audio/*"/>
 <div class="toast-container" id="toast-container"></div>
 
+<!-- Phone Files Access Request Modal (shown once on app open) -->
+<div id="phone-access-modal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(3,6,14,.92);align-items:center;justify-content:center;padding:20px;">
+  <div style="max-width:380px;width:100%;background:rgba(6,9,26,.98);border:1px solid var(--border2);border-radius:20px;padding:28px 22px;text-align:center;box-shadow:0 0 60px rgba(0,229,255,.08);animation:fadeIn .35s ease;">
+    <div style="font-size:44px;margin-bottom:14px;">📂</div>
+    <div style="font-family:var(--font-display);color:var(--cyan);font-size:14px;letter-spacing:1px;margin-bottom:12px;" data-i18n="phone_access_title">RUHUSU UFIKIAJI WA FAILI ZA SIMU</div>
+    <p style="color:var(--text2);font-size:12px;line-height:1.7;margin-bottom:22px;" data-i18n="phone_access_desc">
+      DAXON AI inaweza kusoma hati zako (PDF, DOCX, Picha n.k.) zilizopo kwenye simu ili kukusaidia kufanya muhtasari na kujibu maswali papo hapo. Chagua folder yenye hati zako kuendelea.
+    </p>
+    <button class="btn btn-primary btn-full" onclick="grantPhoneAccessFromModal()" style="margin-bottom:10px;" data-i18n="btn_allow">✅ RUHUSU</button>
+    <button class="btn btn-full" onclick="closePhoneAccessModal()" data-i18n="btn_not_now">SIO SASA</button>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════════════
 //  DAXON v3.0 — COMPLETE JAVASCRIPT ENGINE
@@ -722,6 +737,10 @@ const I18N = {
     pt_dashboard: 'DASHIBODI', lbl_events: 'MATUKIO',
     ct_recent_notes: '📚 NOTES ZA HIVI KARIBUNI', ct_today_schedule: "📅 RATIBA YA LEO",
     pt_notes: 'MENEJA WA NOTES', ph_search_notes: 'Tafuta notes...', drop_files: 'TUPA FAILI HAPA AU BONYEZA KUPAKIA',
+    grant_access: 'RUHUSU UFIKIAJI WA FAILI ZA SIMU', grant_access_desc: 'Baada ya kukubali, hati zote (PDF, DOCX, PPTX, XLSX, TXT, Picha) zilizopo kwenye simu yako zitasomwa na kuonekana moja kwa moja hapa chini kama Notes — na DAXON AI itaweza kuzisoma zote ukiwasha "Notes Context"',
+    phone_access_title: 'RUHUSU UFIKIAJI WA FAILI ZA SIMU', phone_access_desc: 'DAXON AI inaweza kusoma hati zako (PDF, DOCX, Picha n.k.) zilizopo kwenye simu ili kukusaidia kufanya muhtasari na kujibu maswali papo hapo. Chagua folder yenye hati zako kuendelea.',
+    btn_allow: '✅ RUHUSU', btn_not_now: 'SIO SASA',
+    phone_files_title: 'FAILI ZA SIMU', rescan: 'CHAGUA FOLDER NYINGINE',
     btn_new_note: '➕ NOTE MPYA', pt_write_note: 'ANDIKA NOTE', lbl_title: 'KICHWA', ph_note_title: 'Kichwa cha note...',
     lbl_content: 'MAUDHUI', ph_write_here: 'Andika hapa...', btn_save: '💾 HIFADHI', btn_close: '✕ FUNGA',
     btn_edit: '✎ HARIRI', btn_read_aloud: '🔊 SOMA KWA SAUTI',
@@ -774,6 +793,10 @@ const I18N = {
     pt_dashboard: 'DASHBOARD', lbl_events: 'EVENTS',
     ct_recent_notes: '📚 RECENT NOTES', ct_today_schedule: "📅 TODAY'S SCHEDULE",
     pt_notes: 'NOTES MANAGER', ph_search_notes: 'Search notes...', drop_files: 'DROP FILES OR CLICK TO IMPORT',
+    grant_access: 'GRANT ACCESS TO PHONE FILES', grant_access_desc: 'Once you allow this, every document (PDF, DOCX, PPTX, XLSX, TXT, Images) on your phone will be read and appear below as Notes automatically — and DAXON AI will be able to read all of them when "Notes Context" is on',
+    phone_access_title: 'GRANT ACCESS TO PHONE FILES', phone_access_desc: 'DAXON AI can read your documents (PDF, DOCX, Images, etc.) on your phone to help you summarize and answer questions instantly. Choose the folder containing your documents to continue.',
+    btn_allow: '✅ ALLOW', btn_not_now: 'NOT NOW',
+    phone_files_title: 'PHONE FILES', rescan: 'CHOOSE ANOTHER FOLDER',
     btn_new_note: '➕ NEW NOTE', pt_write_note: 'WRITE NOTE', lbl_title: 'TITLE', ph_note_title: 'Note title...',
     lbl_content: 'CONTENT', ph_write_here: 'Write here...', btn_save: '💾 SAVE', btn_close: '✕ CLOSE',
     btn_edit: '✎ EDIT', btn_read_aloud: '🔊 READ ALOUD',
@@ -980,6 +1003,24 @@ function initApp() {
   applyLanguage(currentLang);
   setInterval(checkReminders, 60000);
   setInterval(renderDashboard, 5000);
+  maybeShowPhoneAccessPrompt();
+}
+
+// ── PHONE ACCESS PROMPT (asks once per user, right after app opens) ──
+function maybeShowPhoneAccessPrompt() {
+  if(!currentUser) return;
+  const key = 'daxon_phone_access_asked_' + currentUser.id;
+  if(localStorage.getItem(key)) return;
+  setTimeout(() => { const m = el('phone-access-modal'); if(m) m.style.display = 'flex'; }, 1000);
+}
+function closePhoneAccessModal() {
+  const m = el('phone-access-modal');
+  if(m) m.style.display = 'none';
+  if(currentUser) localStorage.setItem('daxon_phone_access_asked_' + currentUser.id, '1');
+}
+function grantPhoneAccessFromModal() {
+  closePhoneAccessModal();
+  requestPhoneFilesAccess();
 }
 
 function goTo(page) {
@@ -1022,6 +1063,58 @@ function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
 function dropFile(e) { e.preventDefault(); e.currentTarget.classList.remove('drag-over'); const f = e.dataTransfer?.files?.[0]; if(f) readFileAsNote(f); }
 function handleFileImport(e) { const f = e.target.files?.[0]; if(f) readFileAsNote(f); e.target.value = ''; }
 
+// ── PHONE FILES ACCESS (Documents on device, auto-imported directly into Notes) ──
+const PHONE_DOC_EXTENSIONS = ['pdf','doc','docx','ppt','pptx','xls','xlsx','txt','md','csv','json','png','jpg','jpeg','webp'];
+function requestPhoneFilesAccess() { el('phone-files-input').click(); }
+function formatFileSize(bytes) {
+  if(bytes < 1024) return bytes + ' B';
+  if(bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+// Mtumiaji anapokubali ufikiaji wa folder, faili ZOTE zinazotambulika husomwa
+// moja kwa moja na kuwa Notes - bila kuhitaji kubonyeza kila faili kimoja kimoja.
+async function handlePhoneFilesAccess(e) {
+  const rawFiles = Array.from(e.target.files || []);
+  e.target.value = '';
+  if(rawFiles.length === 0) return;
+  const supported = rawFiles.filter(f => PHONE_DOC_EXTENSIONS.includes(f.name.split('.').pop().toLowerCase()));
+  if(supported.length === 0) { showToast('⚠️ Hakuna hati zinazotambulika kwenye folder hiyo', 'warning'); return; }
+  const MAX_FILES = 200;
+  const toProcess = supported.slice(0, MAX_FILES);
+  const progress = el('phone-scan-progress');
+  progress.style.display = 'block';
+  let added = 0, skipped = 0, failed = 0;
+  for(let i = 0; i < toProcess.length; i++) {
+    const f = toProcess[i];
+    progress.textContent = `⏳ Inasoma faili ${i + 1}/${toProcess.length}: ${f.name}`;
+    const already = notes.some(n => n.source === 'device' && n.deviceKey === (f.webkitRelativePath || f.name) + ':' + f.size);
+    if(already) { skipped++; continue; }
+    try {
+      const content = await parseFileContent(f);
+      if(content && content.trim().length > 5) {
+        notes.push({
+          id: uid(),
+          title: f.name.replace(/\.[^/.]+$/, ''),
+          content,
+          source: 'device',
+          deviceKey: (f.webkitRelativePath || f.name) + ':' + f.size,
+          devicePath: f.webkitRelativePath || f.name,
+          createdAt: ts(), updatedAt: ts()
+        });
+        added++;
+      } else { failed++; }
+    } catch(err) { failed++; }
+    if(i % 5 === 0) { saveNotes(); renderNotes(); renderDashboard(); }
+  }
+  saveNotes(); renderNotes(); renderDashboard();
+  progress.style.display = 'none';
+  let msg = `✅ Faili ${added} mpya zimeongezwa kwenye Notes!`;
+  if(skipped) msg += ` (${skipped} tayari zilikuwepo)`;
+  if(supported.length > MAX_FILES) msg += ` ⚠️ Faili ${supported.length - MAX_FILES} hazikusomwa (kikomo ${MAX_FILES})`;
+  showToast(msg, added ? 'success' : 'warning');
+}
+
+
 async function readFileAsNote(file) {
   showToast('⏳ Inasoma: ' + file.name);
   try {
@@ -1032,6 +1125,7 @@ async function readFileAsNote(file) {
     showToast('✅ Imeingizwa: ' + title, 'success');
   } catch(err) { showToast('⚠️ Hitilafu: ' + file.name, 'error'); console.error(err); }
 }
+
 
 async function parseFileContent(file) {
   const ext = file.name.split('.').pop().toLowerCase();
@@ -1175,7 +1269,7 @@ function renderNotes() {
   el('notes-list').innerHTML = f.length ? [...f].reverse().map(n => `
     <div class="note-item" onclick="openNoteReader('${n.id}')">
       <div style="display:flex;justify-content:space-between;align-items:start;">
-        <div class="note-title">${n.title} <span class="badge ${n.source==='file'?'badge-success':'badge-warning'}">${n.source==='file'?'📄':'✎'}</span></div>
+        <div class="note-title">${n.title} <span class="badge ${n.source==='file'?'badge-success':n.source==='device'?'badge-success':'badge-warning'}">${n.source==='device'?'📱':n.source==='file'?'📄':'✎'}</span></div>
         <button onclick="deleteNote('${n.id}',event)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0;">🗑</button>
       </div>
       <div class="note-preview">${n.content.slice(0,90)}...</div>
@@ -1587,265 +1681,4 @@ const EN_LANG_HINTS = ['the','and','is','are','was','were','of','to','in','on','
 function daxonDetectLanguage(text) {
   const words = (text || '').toLowerCase().match(/[a-z]+/g) || [];
   let sw = 0, en = 0;
-  words.forEach(w => { if(SW_LANG_HINTS.includes(w)) sw++; if(EN_LANG_HINTS.includes(w)) en++; });
-  return sw >= en ? 'Swahili' : 'English';
-}
-// Detects the user's "intent" from their question about the uploaded file
-function daxonDetectIntent(question) {
-  const q = (question || '').toLowerCase();
-  if(/tafsiri|translate/.test(q)) return 'translate';
-  if(/muhtasari|fupisha|kwa\s*ufupi|summarize|summary/.test(q)) return 'summarize';
-  if(/soma\s*maandishi|nini\s*kimeandikwa|maandishi\s*yote|onyesha\s*maandishi|extract\s*text|toa\s*maandishi/.test(q)) return 'extract';
-  return 'answer';
-}
-// Analyzes the uploaded file and answers based on the user's intent - no API key needed
-async function daxonAnswerFromFile(question, content, fileName) {
-  const label = `📎 <b>${t('file_label')}: ${fileName}</b><br><br>`;
-  if(!content || content.trim().length < 5) {
-    return label + (currentLang === 'sw' ? '⚠️ Sikuweza kusoma maandishi yoyote kwenye faili hili.' : "⚠️ I couldn't read any text from this file.");
-  }
-  const intent = daxonDetectIntent(question);
-  if(intent === 'summarize') {
-    return label + formatSummary(content.slice(0, 8000)).replace(/\n/g, '<br>');
-  }
-  if(intent === 'extract') {
-    const preview = content.slice(0, 2000);
-    const extractLabel = currentLang === 'sw' ? '📝 <b>Maandishi Yaliyotambuliwa:</b><br>' : '📝 <b>Extracted Text:</b><br>';
-    return label + extractLabel + preview.replace(/\n/g, '<br>') + (content.length > 2000 ? '...' : '');
-  }
-  if(intent === 'translate') {
-    const sourceLang = daxonDetectLanguage(content);
-    let targetLang = sourceLang === 'Swahili' ? 'English' : 'Swahili';
-    if(/kiingereza|to\s*english/.test(question.toLowerCase())) targetLang = 'English';
-    if(/kiswahili|to\s*swahili/.test(question.toLowerCase())) targetLang = 'Swahili';
-    const translated = await daxonTranslate(content.slice(0, 1900), sourceLang, targetLang);
-    const translLabel = currentLang === 'sw' ? '🌐 <b>Tafsiri' : '🌐 <b>Translation';
-    return label + `${translLabel} (${sourceLang} → ${targetLang}):</b><br>` + translated.replace(/\n/g, '<br>');
-  }
-  const quick = extractRelevant(content, question, 1);
-  const detailed = extractRelevant(content, question, 5);
-  if(detailed && tokenize(detailed).length > 0) {
-    const fromFileLabel = currentLang === 'sw' ? '📖 <b>Maelezo Zaidi kutoka Failini:</b><br>' : '📖 <b>More Details from the File:</b><br>';
-    return label + `<b>${t('quick_answer').replace(':','').trim()}:</b><br>${quick}<br><br>${fromFileLabel}${detailed}`;
-  }
-  return label + (currentLang === 'sw'
-    ? `🤔 Sikuona sehemu inayolingana moja kwa moja na swali lako ndani ya faili hili. Jaribu maneno mengine, au niombe "fanya muhtasari".`
-    : `🤔 I couldn't find a section that directly matches your question in this file. Try different words, or ask me to "summarize".`);
-}
-async function handleAiFileAttach(e) {
-  const f = e.target.files?.[0];
-  e.target.value = '';
-  if(!f) return;
-  const chatBox = el('ai-chat-box');
-  chatBox.innerHTML += `<div class="ai-msg ai-msg-user"><div class="ai-msg-label">👤 WEWE</div>📎 Umepakia faili: <b>${f.name}</b></div>`;
-  chatBox.innerHTML += `<div class="ai-msg ai-msg-bot" id="ai-typing"><div class="ai-msg-label">🤖 DAXON AI</div><span class="loading">⟳</span> Inasoma na kuchanganua faili...</div>`;
-  chatBox.scrollTop = chatBox.scrollHeight;
-  try {
-    const content = await parseFileContent(f);
-    aiAttachedContent = content;
-    aiAttachedFileName = f.name;
-    updateAiAttachmentChip();
-    const summary = formatSummary(content.slice(0, 8000));
-    const answer = `📎 <b>Nimesoma faili: ${f.name}</b><br><br>${summary.replace(/\n/g, '<br>')}<br><br>💬 <i>Sasa uliza chochote kuhusu faili hili — mfano "fanya muhtasari", "tafsiri kwa kiingereza", au swali lolote mahususi.</i>`;
-    const typing = el('ai-typing');
-    if(typing) typing.outerHTML = `<div class="ai-msg ai-msg-bot"><div class="ai-msg-label">🤖 DAXON AI</div>${answer}</div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
-    showToast('✅ Faili limesomwa!', 'success');
-  } catch(err) {
-    const typing = el('ai-typing');
-    if(typing) typing.outerHTML = `<div class="ai-msg ai-msg-bot"><div class="ai-msg-label">🤖 DAXON AI</div>⚠️ Nimeshindwa kusoma faili hili. Jaribu faili jingine.</div>`;
-  }
-}
-function updateAiAttachmentChip() {
-  const chip = el('ai-attachment-chip');
-  if(!chip) return;
-  if(aiAttachedContent) {
-    chip.style.display = 'flex';
-    el('ai-attachment-name').textContent = '📎 ' + aiAttachedFileName;
-  } else {
-    chip.style.display = 'none';
-  }
-}
-function clearAiAttachment() {
-  aiAttachedContent = ''; aiAttachedFileName = '';
-  updateAiAttachmentChip();
-  showToast('🗑 Faili limeondolewa');
-}
-
-async function askAI() {
-  const q = el('ai-question').value.trim();
-  if(!q) return;
-  el('ai-question').value = '';
-  const chatBox = el('ai-chat-box');
-  chatBox.innerHTML += `<div class="ai-msg ai-msg-user"><div class="ai-msg-label">👤 WEWE</div>${q}</div>`;
-  chatBox.innerHTML += `<div class="ai-msg ai-msg-bot" id="ai-typing"><div class="ai-msg-label">🤖 DAXON AI</div><span class="loading">⟳</span> Inatafuta na kuchanganua...</div>`;
-  chatBox.scrollTop = chatBox.scrollHeight;
-
-  let answer;
-  if(aiAttachedContent) {
-    answer = await daxonAnswerFromFile(q, aiAttachedContent, aiAttachedFileName);
-  } else if(webSearchEnabled && privacyMode) {
-    answer = currentLang === 'sw'
-      ? `🔒 Privacy Mode iko ON — DAXON AI haiwezi kutafuta mtandaoni. Zima Privacy Mode kwenye ukurasa wa About, au tumia 📚 Notes Context badala yake.`
-      : `🔒 Privacy Mode is ON — DAXON AI cannot search online. Turn it off on the About page, or use 📚 Notes Context instead.`;
-  } else if(webSearchEnabled) {
-    const web = await daxonWebLookup(q);
-    if(web) {
-      const quick = extractRelevant(web.extract, q, 1) || splitSentences(web.extract)[0] || web.extract;
-      const detailed = extractRelevant(web.extract, q, 4) || web.extract;
-      answer = `<b>${t('quick_answer')}</b><br>${quick}<br><br><b>${t('more_details')}</b><br>${detailed}<br><br>🔗 <i>${t('source_label')}: ${web.source} — ${web.title}</i>${daxonExternalSearchLinks(q)}`;
-    } else {
-      answer = (currentLang === 'sw'
-        ? `⚠️ Sikuweza kupata taarifa mtandaoni kuhusu "${q}" kwenye vyanzo vyetu vya bure (Wikipedia/DuckDuckGo). Jaribu matokeo kamili hapa chini:`
-        : `⚠️ I couldn't find online information about "${q}" in our free sources (Wikipedia/DuckDuckGo). Try the full results below:`) + daxonExternalSearchLinks(q);
-    }
-  } else if(useNotesContext && notes.length > 0) {
-    const combined = notes.slice(-6).map(n => n.title + '. ' + n.content).join(' ');
-    const relevant = extractRelevant(combined, q, 5);
-    if(relevant && tokenize(relevant).length > 0) {
-      const quick = extractRelevant(combined, q, 1);
-      answer = `<b>${t('quick_answer')}</b><br>${quick}<br><br><b>${t('from_notes')}</b><br>${relevant}`;
-    } else {
-      answer = currentLang === 'sw'
-        ? `🤔 Sikupata jibu la moja kwa moja kwenye Notes zako kuhusu "${q}". Washa <b>🌐 Internet</b> ili nitafute mtandaoni, au andika notes zenye taarifa zaidi kuhusu mada hii.`
-        : `🤔 I couldn't find a direct answer in your Notes about "${q}". Turn on <b>🌐 Internet</b> so I can search online, or write notes with more information on this topic.`;
-    }
-  } else {
-    answer = currentLang === 'sw'
-      ? `💡 Washa <b>🌐 Internet</b> ili nikutafutie taarifa mtandaoni kuhusu "${q}", au washa <b>📚 Notes Context</b> ili nichanganue notes ulizoshaandika.`
-      : `💡 Turn on <b>🌐 Internet</b> so I can find information online about "${q}", or turn on <b>📚 Notes Context</b> so I can analyze the notes you've already written.`;
-  }
-
-  const typing = el('ai-typing');
-  if(typing) typing.outerHTML = `<div class="ai-msg ai-msg-bot"><div class="ai-msg-label">🤖 DAXON AI</div>${answer}</div>`;
-  chatBox.scrollTop = chatBox.scrollHeight;
-  aiMessages.push({ user: q, bot: answer });
-}
-
-function startVoiceAI() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR) { showToast('⚠️ Sauti haionekani kwenye kivinjari hiki', 'error'); return; }
-  const r = new SR();
-  r.lang = 'sw-TZ';
-  r.onresult = e => { el('ai-question').value = e.results[0][0].transcript; askAI(); };
-  r.onerror = () => showToast('⚠️ Hitilafu ya maikrofoni', 'error');
-  r.start();
-  showToast('🎙️ Sema sasa...');
-}
-function toggleWebSearch() {
-  webSearchEnabled = !webSearchEnabled;
-  el('web-search-toggle').textContent = `🌐 Internet: ${webSearchEnabled ? 'ON' : 'OFF'}`;
-  el('web-search-toggle').style.borderColor = webSearchEnabled ? 'rgba(0,230,118,.4)' : '';
-  el('web-search-toggle').style.color = webSearchEnabled ? 'var(--green)' : '';
-}
-function toggleNotesCtx() {
-  useNotesContext = !useNotesContext;
-  el('notes-ctx-toggle').textContent = `📚 Notes Context: ${useNotesContext ? 'ON' : 'OFF'}`;
-}
-function clearChat() { el('ai-chat-box').innerHTML = ''; aiMessages = []; showToast('🗑 Mazungumzo yamefutwa'); }
-
-// ── TRANSLATION ──
-function swapLangs() {
-  const from = el('lang-from'), to = el('lang-to');
-  [from.value, to.value] = [to.value, from.value];
-  const inp = el('translate-input'), out = el('translate-output');
-  if(out.textContent) { const tmp = inp.value; inp.value = out.textContent; out.textContent = tmp; }
-}
-const DAXON_LANG_CODES = { Swahili: 'sw', English: 'en', French: 'fr', Spanish: 'es', Arabic: 'ar', Chinese: 'zh-CN', German: 'de', Portuguese: 'pt', Japanese: 'ja', Korean: 'ko' };
-// Translate without an API key - uses the free MyMemory Translation API (no signup required)
-async function daxonTranslate(text, fromName, toName) {
-  const from = DAXON_LANG_CODES[fromName] || 'en';
-  const to = DAXON_LANG_CODES[toName] || 'sw';
-  if(from === to) return text;
-  if(privacyMode) {
-    return currentLang === 'sw'
-      ? '🔒 Privacy Mode iko ON — tafsiri ya mtandaoni imezimwa. Zima Privacy Mode kwenye About ili kutumia tafsiri.'
-      : '🔒 Privacy Mode is ON — online translation is disabled. Turn it off in the About page to use translation.';
-  }
-  try {
-    const parts = [];
-    let remaining = text;
-    while(remaining.length > 0) { parts.push(remaining.slice(0, 480)); remaining = remaining.slice(480); }
-    const out = [];
-    for(const part of parts) {
-      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(part)}&langpair=${from}|${to}`);
-      const data = await res.json();
-      out.push(data.responseData?.translatedText || part);
-    }
-    return out.join(' ');
-  } catch(e) { return '⚠️ Hitilafu ya mtandao wakati wa kutafsiri. Hakikisha uko online.'; }
-}
-async function doTranslate() {
-  const t = el('translate-input').value.trim();
-  const from = el('lang-from').value, to = el('lang-to').value;
-  if(!t) { showToast('⚠️ Andika maandishi kwanza'); return; }
-  hide('translate-result'); show('translate-loading');
-  const result = await daxonTranslate(t, from, to);
-  el('translate-output').textContent = result;
-  hide('translate-loading'); show('translate-result');
-}
-function startTranslateVoice() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR) { showToast('⚠️ Sauti haionekani'); return; }
-  const r = new SR();
-  const from = el('lang-from').value;
-  r.lang = from === 'Swahili' ? 'sw-TZ' : from === 'French' ? 'fr-FR' : 'en-US';
-  r.onresult = e => { el('translate-input').value = e.results[0][0].transcript; };
-  r.onerror = () => showToast('⚠️ Hitilafu ya maikrofoni', 'error');
-  r.start();
-  showToast('🎙️ Sema sasa...');
-}
-function copyTranslation() {
-  const txt = el('translate-output').textContent;
-  if(txt) navigator.clipboard?.writeText(txt).then(() => showToast('✅ Imenakiliwa!', 'success'));
-}
-
-// ── ABOUT ──
-function renderAbout() {
-  if(!currentUser) return;
-  el('about-account-info').innerHTML = `
-    <div style="color:var(--text);margin-bottom:12px;font-family:var(--font-display);font-size:13px;">👤 ${currentUser.fullName}</div>
-    <div style="color:var(--text2);font-family:var(--font-mono);font-size:11px;line-height:2;">
-      <div>📧 Email: ${currentUser.email}</div>
-      ${currentUser.phone ? `<div>📱 Simu: ${currentUser.phone}</div>` : ''}
-      <div>🕐 Alijiunga: ${currentUser.joinedAt}</div>
-    </div>`;
-  // Database info
-  const users = JSON.parse(localStorage.getItem('daxon_users')) || [];
-  const allNotes = JSON.parse(localStorage.getItem('daxon_notes_' + currentUser.id)) || [];
-  const allEvents = JSON.parse(localStorage.getItem('daxon_events_' + currentUser.id)) || [];
-  const allSummaries = JSON.parse(localStorage.getItem('daxon_summaries_' + currentUser.id)) || [];
-  const dbSize = JSON.stringify(localStorage).length;
-  el('db-info').innerHTML = `
-    <div>👥 Watumiaji wote: ${users.length}</div>
-    <div>📝 Notes: ${allNotes.length}</div>
-    <div>📅 Matukio: ${allEvents.length}</div>
-    <div>💡 Summaries: ${allSummaries.length}</div>
-    <div>💾 Ukubwa wa DB: ~${Math.round(dbSize/1024)}KB / 5MB</div>
-    <div style="margin-top:10px;color:var(--cyan);">🔒 Data imehifadhiwa kwenye kivinjari chako (localStorage)</div>`;
-}
-
-// ── SPEECH ──
-function speakText(txt) {
-  window.speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(txt);
-  utter.rate = 0.9; utter.pitch = 1;
-  window.speechSynthesis.speak(utter);
-}
-
-// ── INIT TRIGGER ──
-if(currentUser) {
-  const introScreen = el('intro-screen');
-  // Still show intro, then show app
-}
-
-// ── PWA: SERVICE WORKER REGISTRATION (offline support / installable app) ──
-if('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
-  });
-}
-
-</script>
-</body>
-</html>
+  words.forEach(w => { if(SW_LANG_HINTS.includes(w)) sw
