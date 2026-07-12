@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
+<title>DAXON AI — Ultimate Study Platform</title>
+<link rel="manifest" href="./manifest.json"/>
+<meta name="theme-color" content="#03060e"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="DAXON AI"/>
+<link rel="icon" href="./icon-192.png" type="image/png"/>
+<link rel="apple-touch-icon" href="./icon-192.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#03060e;--bg2:#06091a;--bg3:#0a1020;
+  --cyan:#00e5ff;--blue:#4a9eff;--purple:#8b5cf6;
+  --green:#00e676;--red:#ff1744;--gold:#ffd740;--pink:#f472b6;
+  --text:#d4eaf7;--text2:#5a8aaa;--text3:#1e3a55;
+  --border:rgba(0,229,255,0.12);--border2:rgba(0,229,255,0.28);
+  --card:rgba(0,229,255,0.03);--card2:rgba(0,229,255,0.07);
+  --glow:0 0 24px rgba(0,229,255,0.18);
+  --font-display:'Orbitron',monospace;
+  --font-mono:'Share Tech Mono',monospace;
+  --font-body:'Rajdhani',sans-serif;
+}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:15px;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:rgba(0,229,255,0.25);border-radius:2px;}
+
+/* ══ ANIMATED INTRO ══ */
+#intro-screen{
+  position:fixed;inset:0;z-index:9999;overflow:hidden;
+  background:radial-gradient(ellipse at 30% 40%,rgba(0,229,255,0.06),transparent 60%),
+             radial-gradient(ellipse at 70% 70%,rgba(139,92,246,0.06),transparent 60%),
+             var(--bg);
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+}
+.intro-bg-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(0,229,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.04) 1px,transparent 1px);
+  background-size:50px 50px;
+  animation:gridMove 20s linear infinite;
+}
+@keyframes gridMove{0%{transform:translate(0,0)}100%{transform:translate(50px,50px)}}
+.intro-ring{
+  position:absolute;width:600px;height:600px;border-radius:50%;
+  border:1px solid rgba(0,229,255,0.08);
+  animation:ringPulse 4s ease-in-out infinite;
+}
+.intro-ring:nth-child(2){width:450px;height:450px;animation-delay:-1s;border-color:rgba(139,92,246,0.08);}
+.intro-ring:nth-child(3){width:300px;height:300px;animation-delay:-2s;border-color:rgba(0,229,255,0.12);}
+@keyframes ringPulse{0%,100%{transform:scale(1);opacity:0.4}50%{transform:scale(1.08);opacity:1}}
+.intro-center{position:relative;z-index:2;text-align:center;}
+.intro-logo-wrap{position:relative;display:inline-block;margin-bottom:24px;}
+.intro-hex{
+  width:100px;height:100px;
+  background:linear-gradient(135deg,rgba(0,229,255,0.15),rgba(139,92,246,0.15));
+  border:2px solid var(--cyan);clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  display:flex;align-items:center;justify-content:center;
+  animation:hexSpin 8s linear infinite;
+  margin:0 auto;
+}
+@keyframes hexSpin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.intro-hex-inner{font-size:42px;animation:hexSpin 8s linear infinite reverse;}
+.intro-title-main{
+  font-family:var(--font-display);font-size:52px;font-weight:900;letter-spacing:12px;
+  background:linear-gradient(135deg,var(--cyan),var(--blue),var(--purple));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:titleGlow 2s ease-in-out infinite alternate;
+}
+@keyframes titleGlow{from{filter:brightness(1)}to{filter:brightness(1.4)}}
+.intro-sub{
+  font-family:var(--font-mono);font-size:12px;letter-spacing:6px;color:var(--blue);
+  margin-top:8px;animation:blink 1.8s infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.35}}
+.intro-tagline{color:var(--text2);font-size:14px;letter-spacing:2px;margin:20px 0 30px;max-width:480px;}
+.intro-progress-wrap{width:340px;margin:0 auto 20px;}
+.intro-progress-bar{
+  width:100%;height:3px;background:rgba(0,229,255,0.12);border-radius:2px;overflow:hidden;
+}
+.intro-progress-fill{
+  height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple));
+  border-radius:2px;width:0%;transition:width 0.1s linear;
+}
+.intro-timer{font-family:var(--font-mono);font-size:11px;color:var(--text3);margin-top:8px;text-align:right;}
+.intro-skip{
+  background:transparent;border:1px solid var(--border2);border-radius:8px;
+  color:var(--text2);font-family:var(--font-mono);font-size:11px;letter-spacing:3px;
+  padding:10px 28px;cursor:pointer;transition:all 0.3s;
+}
+.intro-skip:hover{border-color:var(--cyan);color:var(--cyan);box-shadow:var(--glow);}
+.intro-feature-pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:28px;}
+.pill{
+  padding:5px 14px;border-radius:20px;border:1px solid var(--border);
+  font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--text2);
+  background:var(--card);animation:fadeIn 0.5s ease forwards;opacity:0;
+}
+@keyframes fadeIn{to{opacity:1}}
+
+/* ══ AUTH ══ */
+#auth-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:1000;overflow-y:auto;background:var(--bg);background-image:radial-gradient(ellipse at 20% 50%,rgba(0,229,255,0.04),transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(139,92,246,0.04),transparent 60%);}
+.auth-card{width:100%;max-width:400px;margin:16px;background:rgba(6,9,26,.98);border:1px solid var(--border2);border-radius:22px;padding:34px 28px;box-shadow:0 0 80px rgba(0,229,255,.06),inset 0 1px 0 rgba(0,229,255,.08);animation:fadeIn .5s ease;}
+.auth-logo{text-align:center;margin-bottom:28px;}
+.auth-logo .logo-icon{font-size:50px;display:block;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.auth-logo h1{font-family:var(--font-display);color:var(--cyan);font-size:28px;letter-spacing:6px;margin-top:8px;}
+.auth-logo p{color:var(--blue);font-size:9px;letter-spacing:8px;margin-top:4px;font-family:var(--font-mono);}
+.auth-tabs{display:flex;background:rgba(0,0,0,.5);border-radius:12px;padding:4px;margin-bottom:24px;}
+.auth-tab{flex:1;padding:10px 0;border:none;border-radius:10px;cursor:pointer;font-family:var(--font-display);font-size:10px;letter-spacing:2px;transition:all .3s;}
+.auth-tab.active{background:linear-gradient(135deg,var(--cyan),var(--blue));color:#000;font-weight:700;}
+.auth-tab:not(.active){background:transparent;color:var(--text2);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--blue);margin-bottom:6px;}
+.field input,.field select,.field textarea{width:100%;padding:11px 14px;background:rgba(0,229,255,.04);border:1px solid var(--border);border-radius:11px;color:var(--text);font-family:var(--font-mono);font-size:13px;outline:none;transition:border-color .2s,box-shadow .2s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.08);}
+.field input::placeholder,.field textarea::placeholder{color:var(--text3);}
+.field select option{background:#0a1020;}
+.field textarea{resize:vertical;line-height:1.7;}
+.auth-btn{width:100%;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--cyan),var(--blue));color:#000;font-family:var(--font-display);font-size:11px;font-weight:700;letter-spacing:3px;cursor:pointer;transition:opacity .2s,transform .15s;margin-top:6px;}
+.auth-btn:hover{opacity:.9;transform:translateY(-2px);}
+.auth-error{color:var(--red);font-size:11px;text-align:center;margin:8px 0;font-family:var(--font-mono);min-height:18px;}
+
+/* ══ APP SHELL ══ */
+#app{display:none;height:100vh;flex-direction:column;}
+#app.visible{display:flex;}
+#topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:rgba(3,6,14,.98);border-bottom:1px solid var(--border);position:relative;z-index:50;flex-shrink:0;}
+.top-logo{display:flex;align-items:center;gap:10px;}
+.top-logo span{font-family:var(--font-display);color:var(--cyan);font-size:14px;letter-spacing:5px;}
+.top-right{display:flex;align-items:center;gap:12px;}
+.top-user{color:var(--text2);font-family:var(--font-mono);font-size:10px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.logout-btn{background:none;border:1px solid rgba(255,23,68,.35);border-radius:7px;color:var(--red);padding:5px 11px;font-family:var(--font-mono);font-size:9px;cursor:pointer;letter-spacing:1px;transition:all .2s;}
+.logout-btn:hover{background:rgba(255,23,68,.1);}
+#layout{display:flex;flex:1;overflow:hidden;}
+#sidebar{width:64px;background:rgba(3,6,14,.98);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:3px;flex-shrink:0;overflow-y:auto;}
+.nav-btn{width:52px;height:54px;border:1px solid transparent;border-radius:13px;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:all .2s;}
+.nav-btn:hover{background:var(--card2);border-color:var(--border);}
+.nav-btn.active{background:var(--card2);border-color:var(--border2);box-shadow:var(--glow);}
+.nav-btn .nav-icon{font-size:18px;line-height:1;}
+.nav-btn .nav-label{font-size:6.5px;color:var(--text2);font-family:var(--font-mono);letter-spacing:.5px;text-align:center;}
+.nav-btn.active .nav-label{color:var(--cyan);}
+#content{flex:1;overflow-y:auto;padding:18px;}
+.page{display:none;animation:fadeIn .3s ease;}
+.page.active{display:block;}
+.page-title{font-family:var(--font-display);color:var(--cyan);font-size:14px;letter-spacing:3px;margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.page-title .dot{width:6px;height:6px;background:var(--cyan);border-radius:50%;animation:blink 2s infinite;flex-shrink:0;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px;}
+.card-title{font-family:var(--font-mono);font-size:9px;letter-spacing:2px;color:var(--blue);margin-bottom:12px;}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 18px;border:1px solid var(--border2);border-radius:10px;background:var(--card2);color:var(--cyan);font-family:var(--font-mono);font-size:10px;letter-spacing:1.5px;cursor:pointer;transition:all .2s;text-decoration:none;}
+.btn:hover{background:rgba(0,229,255,.12);box-shadow:var(--glow);}
+.btn.btn-full{width:100%;margin-top:8px;}
+.btn.btn-danger{border-color:rgba(255,23,68,.4);color:var(--red);}
+.btn.btn-danger:hover{background:rgba(255,23,68,.1);}
+.btn.btn-success{border-color:rgba(0,230,118,.4);color:var(--green);}
+.btn.btn-success:hover{background:rgba(0,230,118,.1);}
+.btn.btn-primary{background:linear-gradient(135deg,rgba(0,229,255,.18),rgba(74,158,255,.18));border-color:var(--cyan);}
+.btn.btn-purple{border-color:rgba(139,92,246,.4);color:var(--purple);}
+.btn.btn-purple:hover{background:rgba(139,92,246,.1);}
+.btn.btn-sm{padding:6px 12px;font-size:9px;}
+input[type=text],input[type=email],input[type=password],input[type=tel],input[type=time],input[type=date],input[type=number],textarea,select{width:100%;padding:10px 13px;background:rgba(0,229,255,.04);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font-mono);font-size:13px;outline:none;transition:border-color .2s;-webkit-appearance:none;}
+input:focus,textarea:focus,select:focus{border-color:rgba(0,229,255,.45);}
+input::placeholder,textarea::placeholder{color:var(--text3);}
+select option{background:#0a1020;color:var(--text);}
+textarea{resize:vertical;line-height:1.7;}
+
+/* Misc */
+.empty{color:var(--text3);font-family:var(--font-mono);font-size:11px;text-align:center;padding:28px 0;}
+.badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:8px;font-family:var(--font-mono);letter-spacing:1px;}
+.badge-success{background:rgba(0,230,118,.14);color:var(--green);}
+.badge-warning{background:rgba(255,215,64,.14);color:var(--gold);}
+.badge-error{background:rgba(255,23,68,.14);color:var(--red);}
+.badge-purple{background:rgba(139,92,246,.14);color:var(--purple);}
+.note-item{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .2s,background .2s;animation:fadeIn .3s ease;}
+.note-item:hover{border-color:var(--border2);background:var(--card2);}
+.note-title{font-family:var(--font-display);font-size:12px;color:var(--text);font-weight:700;margin-bottom:4px;}
+.note-preview{color:var(--text2);font-size:11px;font-family:var(--font-mono);margin-bottom:4px;}
+.note-date{color:var(--text3);font-size:9px;font-family:var(--font-mono);}
+.import-zone{border:2px dashed rgba(0,229,255,.25);border-radius:14px;padding:24px 16px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(0,229,255,.015);margin-bottom:14px;}
+.import-zone:hover,.import-zone.drag-over{border-color:var(--cyan);background:rgba(0,229,255,.06);}
+.import-zone .import-icon{font-size:34px;margin-bottom:8px;}
+.import-zone p{color:var(--text2);font-family:var(--font-mono);font-size:11px;letter-spacing:1px;}
+.import-zone small{color:var(--text3);font-size:9px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:14px 10px;text-align:center;transition:border-color .3s;}
+.stat-card:hover{border-color:var(--border2);}
+.stat-icon{font-size:24px;margin-bottom:4px;}
+.stat-val{font-family:var(--font-display);color:var(--cyan);font-size:24px;font-weight:700;}
+.stat-lbl{font-family:var(--font-mono);color:var(--text2);font-size:8px;letter-spacing:1px;margin-top:2px;}
+.toast-container{position:fixed;bottom:22px;right:22px;z-index:9999;max-width:310px;}
+.toast{background:rgba(6,9,26,.98);border:1px solid var(--border2);border-radius:11px;padding:14px 16px;margin-bottom:8px;animation:slideDown .3s ease;box-shadow:0 0 24px rgba(0,229,255,.09);}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.loading{color:var(--cyan);display:inline-block;animation:spin 1s linear infinite;}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.event-item{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--cyan);border-radius:13px;padding:14px;margin-bottom:10px;transition:all .2s;}
+.event-item:hover{border-color:var(--border2);background:var(--card2);}
+.event-title{font-family:var(--font-display);font-size:12px;color:var(--text);margin-bottom:5px;}
+.event-time{color:var(--blue);font-family:var(--font-mono);font-size:10px;}
+
+/* CAMERA */
+#camera-stream{width:100%;max-width:100%;border-radius:12px;display:none;background:#000;}
+#capture-canvas{display:none;}
+
+/* AI CHAT */
+.ai-msg{padding:12px 14px;border-radius:12px;margin-bottom:10px;line-height:1.7;font-size:13px;animation:fadeIn .3s ease;}
+.ai-msg-user{background:rgba(74,158,255,.1);border:1px solid rgba(74,158,255,.2);border-radius:12px 12px 4px 12px;color:var(--text);}
+.ai-msg-bot{background:rgba(0,229,255,.05);border:1px solid var(--border);border-radius:12px 12px 12px 4px;color:var(--text);}
+.ai-msg-label{font-family:var(--font-mono);font-size:8px;letter-spacing:2px;margin-bottom:6px;}
+.ai-msg-user .ai-msg-label{color:var(--blue);}
+.ai-msg-bot .ai-msg-label{color:var(--cyan);}
+#ai-chat-box{max-height:380px;overflow-y:auto;padding:4px;}
+
+/* SUMMARY CARDS */
+.summary-item{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:10px;animation:fadeIn .3s ease;}
+.summary-item-title{font-family:var(--font-display);font-size:12px;color:var(--cyan);margin-bottom:6px;}
+.summary-item-date{font-family:var(--font-mono);font-size:9px;color:var(--text3);margin-bottom:8px;}
+.summary-item-preview{font-size:12px;color:var(--text2);line-height:1.6;}
+
+/* READER */
+#doc-reader-content{
+  background:rgba(0,229,255,.02);border:1px solid var(--border);
+  border-radius:12px;padding:18px;
+  font-family:var(--font-mono);font-size:12px;
+  line-height:1.9;color:var(--text);
+  max-height:450px;overflow-y:auto;
+  white-space:pre-wrap;word-break:break-word;
+}
+.reader-file-info{font-family:var(--font-mono);font-size:10px;color:var(--blue);margin-bottom:12px;letter-spacing:1px;}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  #sidebar{width:52px;}
+  .nav-btn{width:44px;height:48px;}
+  .nav-btn .nav-icon{font-size:16px;}
+  #content{padding:12px;}
+  .intro-title-main{font-size:34px;letter-spacing:6px;}
+}
+/* Toggle Switch (Privacy Mode) */
+.switch{position:relative;display:inline-block;width:44px;height:24px;}
+.switch input{opacity:0;width:0;height:0;}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--border2);transition:.3s;border-radius:24px;}
+.slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background-color:#fff;transition:.3s;border-radius:50%;}
+.switch input:checked + .slider{background-color:var(--cyan);}
+.switch input:checked + .slider:before{transform:translateX(20px);}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     ANIMATED 10-SECOND INTRO
+═══════════════════════════════════════ -->
+<div id="intro-screen">
+  <div class="intro-bg-grid"></div>
+  <div class="intro-ring"></div>
+  <div class="intro-ring"></div>
+  <div class="intro-ring"></div>
+  <div class="intro-center">
+    <div class="intro-logo-wrap">
+      <div class="intro-hex">
+        <div class="intro-hex-inner">🚀</div>
+      </div>
+    </div>
+    <div class="intro-title-main">DAXON</div>
+    <div class="intro-sub">ULTIMATE STUDY PLATFORM v3.0</div>
+    <p class="intro-tagline">AI-Powered • Smart Notes • Document Reader • Camera OCR • Translation</p>
+    <div class="intro-feature-pills">
+      <div class="pill" style="animation-delay:.2s">📄 Document Reader</div>
+      <div class="pill" style="animation-delay:.4s">🤖 AI Tutor</div>
+      <div class="pill" style="animation-delay:.6s">📷 Camera OCR</div>
+      <div class="pill" style="animation-delay:.8s">🌐 Translation</div>
+      <div class="pill" style="animation-delay:1s">📅 Schedule</div>
+      <div class="pill" style="animation-delay:1.2s">📝 Summaries</div>
+    </div>
+    <div class="intro-progress-wrap">
+      <div class="intro-progress-bar">
+        <div class="intro-progress-fill" id="intro-progress"></div>
+      </div>
+      <div class="intro-timer" id="intro-timer">10s</div>
+    </div>
+    <button class="intro-skip" onclick="skipIntro()">SKIP →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     AUTH SCREEN
+═══════════════════════════════════════ -->
+<div id="auth-screen" style="display:none;">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="logo-icon">🚀</span>
+      <h1>DAXON</h1>
+      <p>ULTIMATE STUDY PLATFORM v3.0</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">REGISTER</button>
+    </div>
+    <div id="login-form">
+      <div class="field"><label>EMAIL</label><input type="email" id="login-email" placeholder="your@email.com"/></div>
+      <div class="field"><label>PASSWORD</label><input type="password" id="login-password" placeholder="••••••••"/></div>
+      <button class="auth-btn" onclick="loginUser()">ENTER SYSTEM →</button>
+    </div>
+    <div id="register-form" style="display:none;">
+      <div class="field"><label>FULL NAME</label><input type="text" id="reg-name" placeholder="Jina Lako"/></div>
+      <div class="field"><label>EMAIL</label><input type="email" id="reg-email" placeholder="your@email.com"/></div>
+      <div class="field"><label>PHONE</label><input type="tel" id="reg-phone" placeholder="+255..."/></div>
+      <div class="field"><label>PASSWORD</label><input type="password" id="reg-password" placeholder="Min 6 chars"/></div>
+      <button class="auth-btn" onclick="registerUser()">CREATE ACCOUNT</button>
+    </div>
+    <div id="auth-error" class="auth-error"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MAIN APP
+═══════════════════════════════════════ -->
+<div id="app">
+  <!-- TOPBAR -->
+  <div id="topbar">
+    <div class="top-logo">
+      <span style="font-size:20px">🚀</span>
+      <span>DAXON</span>
+    </div>
+    <div class="top-right">
+      <span class="top-user" id="topbar-user">User</span>
+      <div id="lang-switch" style="display:flex;gap:4px;">
+        <button class="btn btn-sm" id="lang-btn-sw" onclick="applyLanguage('sw')" style="padding:6px 10px;">🇹🇿 SW</button>
+        <button class="btn btn-sm" id="lang-btn-en" onclick="applyLanguage('en')" style="padding:6px 10px;">🇬🇧 EN</button>
+      </div>
+      <button class="logout-btn" onclick="logoutUser()" data-i18n="logout">LOGOUT</button>
+    </div>
+  </div>
+
+  <!-- LAYOUT -->
+  <div id="layout">
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+      <button class="nav-btn active" data-page="dashboard" onclick="goTo('dashboard')">
+        <span class="nav-icon">📊</span><span class="nav-label" data-i18n="nav_dash">DASH</span>
+      </button>
+      <button class="nav-btn" data-page="notes" onclick="goTo('notes')">
+        <span class="nav-icon">📝</span><span class="nav-label" data-i18n="nav_notes">NOTES</span>
+      </button>
+      <button class="nav-btn" data-page="reader" onclick="goTo('reader')">
+        <span class="nav-icon">📖</span><span class="nav-label" data-i18n="nav_reader">READER</span>
+      </button>
+      <button class="nav-btn" data-page="scanner" onclick="goTo('scanner')">
+        <span class="nav-icon">📷</span><span class="nav-label" data-i18n="nav_scan">SCAN</span>
+      </button>
+      <button class="nav-btn" data-page="summaries" onclick="goTo('summaries')">
+        <span class="nav-icon">💡</span><span class="nav-label" data-i18n="nav_summ">SUMM.</span>
+      </button>
+      <button class="nav-btn" data-page="schedule" onclick="goTo('schedule')">
+        <span class="nav-icon">📅</span><span class="nav-label" data-i18n="nav_sched">SCHED</span>
+      </button>
+      <button class="nav-btn" data-page="daxon-ai" onclick="goTo('daxon-ai')">
+        <span class="nav-icon">🤖</span><span class="nav-label" data-i18n="nav_ai">AI</span>
+      </button>
+      <button class="nav-btn" data-page="translate" onclick="goTo('translate')">
+        <span class="nav-icon">🌐</span><span class="nav-label" data-i18n="nav_trans">TRANS</span>
+      </button>
+      <button class="nav-btn" data-page="about" onclick="goTo('about')">
+        <span class="nav-icon">ℹ️</span><span class="nav-label" data-i18n="nav_info">INFO</span>
+      </button>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="content">
+
+      <!-- ── DASHBOARD ── -->
+      <div id="page-dashboard" class="page active">
+        <div class="page-title"><span class="dot"></span><span data-i18n="pt_dashboard">DASHBOARD</span></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px;">
+          <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-val" id="stat-notes">0</div><div class="stat-lbl" data-i18n="nav_notes">NOTES</div></div>
+          <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-val" id="stat-events">0</div><div class="stat-lbl" data-i18n="lbl_events">EVENTS</div></div>
+          <div class="stat-card"><div class="stat-icon">💡</div><div class="stat-val" id="stat-summaries">0</div><div class="stat-lbl" data-i18n="nav_summ">SUMM.</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title" data-i18n="ct_recent_notes">📚 RECENT NOTES</div>
+          <div id="dash-notes-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-title" data-i18n="ct_today_schedule">📅 TODAY'S SCHEDULE</div>
+          <div id="dash-schedule-list"></div>
+        </div>
+      </div>
+
+      <!-- ── NOTES ── -->
+      <div id="page-notes" class="page">
+        <div class="page-title"><span class="dot"></span><span data-i18n="pt_notes">NOTES MANAGER</span></div>
+        <div id="notes-list-view">
+          <div class="card">
+            <input type="text" id="notes-search" placeholder="Tafuta notes..." data-i18n-ph="ph_search_notes" onkeyup="renderNotes()" style="margin-bottom:12px;"/>
+            <div class="import-zone" ondrop="dropFile(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)" onclick="triggerFileImport()">
+              <div class="import-icon">📂</div>
+              <p data-i18n="drop_files">DROP FILES OR CLICK TO IMPORT</p>
+              <small>PDF • DOCX • PPTX • XLSX • TXT • JSON • CSV • Images</small>
+            </div>
+            <button class="btn btn-full btn-primary" onclick="openNoteEditor()"><span data-i18n="btn_new_note">➕ NOTE MPYA</span></button>
+          </div>
+          <div id="notes-list"></div>
+        </div>
+        <div id="note-editor" style="display:none;">
+          <div class="page-title"><span class="dot"></span><span data-i18n="pt_write_note">ANDIKA NOTE</span></div>
+          <div class="card">
+            <div class="field"><label data-i18n="lbl_title">KICHWA</label><input type="text" id="note-title-input" placeholder="Kichwa cha note..." data-i18n-ph="ph_note_title"/></div>
+            <div class="field"><label data-i18n="lbl_content">MAUDHUI</label><textarea id="note-content-input" placeholder="Andika hapa..." data-i18n-ph="ph_write_here" rows="10"></textarea></div>
+            <div style="display:flex;gap:10px;">
+              <button class="btn btn-success" onclick="saveNote()"><span data-i18n="btn_save">💾 HIFADHI</span></button>
+              <button class="btn btn-danger" onclick="closeNoteEditor()"><span data-i18n="btn_close">✕ FUNGA</span></button>
+            </div>
+          </div>
+        </div>
+        <div id="note-reader-inline" style="display:none;">
+          <div class="page-title"><span class="dot"></span><span id="reader-title-inline">NOTE</span></div>
+          <div class="card">
+            <div id="reader-content-inline" style="line-height:1.8;color:var(--text);white-space:pre-wrap;max-height:380px;overflow-y:auto;font-size:13px;"></div>
+            <div style="color:var(--text3);font-size:10px;margin:10px 0;font-family:var(--font-mono);" id="reader-date-inline"></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="editCurrentNote()"><span data-i18n="btn_edit">✎ HARIRI</span></button>
+              <button class="btn btn-purple" onclick="summarizeCurrentNote()">💡 AI SUMMARIZE</button>
+              <button class="btn" onclick="speakNote()"><span data-i18n="btn_read_aloud">🔊 SOMA KWA SAUTI</span></button>
+              <button class="btn btn-danger" onclick="closeNoteReader()"><span data-i18n="btn_close">✕ FUNGA</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DOCUMENT READER ── -->
+      <div id="page-reader" class="page">
+        <div class="page-title"><span class="dot"></span>DOCUMENT READER</div>
+        <div class="card">
+          <div class="card-title" data-i18n="ct_upload_doc">📤 PAKIA HATI YOYOTE</div>
+          <div class="import-zone" onclick="document.getElementById('reader-file-input').click()" ondrop="dropReaderFile(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)">
+            <div class="import-icon">📄</div>
+            <p data-i18n="click_or_drop">BONYEZA AU TUPA HAPA</p>
+            <small>PDF • DOCX • PPTX • XLSX • TXT • CSV • JSON • MD • Images</small>
+          </div>
+          <input type="file" id="reader-file-input" style="display:none;" accept=".pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.txt,.csv,.json,.md,.png,.jpg,.jpeg,.webp" onchange="readDocumentFile(event)"/>
+        </div>
+        <div id="reader-panel" style="display:none;">
+          <div class="card">
+            <div class="reader-file-info" id="reader-file-info">📄 Hakuna faili</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+              <button class="btn btn-sm" onclick="speakReaderContent()"><span data-i18n="btn_read_aloud">🔊 SOMA KWA SAUTI</span></button>
+              <button class="btn btn-sm btn-purple" onclick="aiSummarizeReader()">💡 AI SUMMARIZE</button>
+              <button class="btn btn-sm btn-success" onclick="saveReaderAsNote()"><span data-i18n="btn_save_as_note">💾 HIFADHI KAMA NOTE</span></button>
+              <button class="btn btn-sm btn-danger" onclick="closeReaderPanel()"><span data-i18n="btn_close">✕ FUNGA</span></button>
+            </div>
+            <div id="doc-reader-content">Subiri...</div>
+          </div>
+          <div id="reader-summary-box" style="display:none;" class="card">
+            <div class="card-title">💡 AI SUMMARY</div>
+            <div id="reader-summary-text" style="line-height:1.8;color:var(--text);font-size:13px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SCANNER / CAMERA ── -->
+      <div id="page-scanner" class="page">
+        <div class="page-title"><span class="dot"></span>SCANNER & CAMERA</div>
+        <div class="card">
+          <div class="card-title" data-i18n="ct_camera">📷 KAMERA (FULL ACCESS)</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+            <button class="btn btn-primary" id="start-cam-btn" onclick="startCamera()"><span data-i18n="btn_start_cam">📷 WASHA KAMERA</span></button>
+            <button class="btn" id="switch-cam-btn" onclick="switchCamera()" style="display:none;"><span data-i18n="btn_switch">🔄 BADILISHA</span></button>
+            <button class="btn btn-success" id="snap-btn" onclick="snapPhoto()" style="display:none;"><span data-i18n="btn_snap">📸 PIGA PICHA</span></button>
+            <button class="btn btn-danger" id="stop-cam-btn" onclick="stopCamera()" style="display:none;"><span data-i18n="btn_stop">⏹ SIMAMA</span></button>
+          </div>
+          <video id="camera-stream" autoplay playsinline muted></video>
+          <canvas id="capture-canvas"></canvas>
+          <div id="cam-ocr-status" style="color:var(--cyan);font-family:var(--font-mono);font-size:11px;margin-top:8px;"></div>
+        </div>
+        <div class="card">
+          <div class="card-title" data-i18n="ct_upload_img">📁 PAKIA PICHA / FAILI</div>
+          <div class="import-zone" onclick="document.getElementById('scan-file-input').click()">
+            <div class="import-icon">🔍</div>
+            <p data-i18n="click_upload_img">BONYEZA KUPAKIA PICHA AU FAILI</p>
+            <small>PNG • JPG • JPEG • WEBP (OCR Text Extraction)</small>
+          </div>
+          <input type="file" id="scan-file-input" style="display:none;" accept="image/*,.pdf,.txt" onchange="handleScanFile(event)"/>
+        </div>
+        <div class="card">
+          <div class="card-title" data-i18n="ct_scan_result">📝 MATOKEO YA SCAN</div>
+          <textarea id="scan-text-result" placeholder="Matokeo ya OCR/scan yataonekana hapa..." data-i18n-ph="ph_scan_result" rows="7"></textarea>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
+            <button class="btn btn-purple btn-sm" onclick="aiSummarizeScan()">💡 SUMMARIZE</button>
+            <button class="btn btn-success btn-sm" onclick="saveScanAsNote()"><span data-i18n="btn_save_note">💾 HIFADHI NOTE</span></button>
+            <button class="btn btn-sm" onclick="speakScan()"><span data-i18n="btn_read">🔊 SOMA</span></button>
+          </div>
+          <div id="scan-summary" style="display:none;margin-top:12px;" class="card">
+            <div class="card-title">💡 AI SUMMARY</div>
+            <div id="scan-summary-text" style="line-height:1.8;color:var(--text);font-size:13px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MY SUMMARIES ── -->
+      <div id="page-summaries" class="page">
+        <div class="page-title"><span class="dot"></span>MY SUMMARIES</div>
+        <div class="card">
+          <div class="card-title" data-i18n="ct_new_summary">📝 MUHTASARI MPYA (MANUAL)</div>
+          <div class="field"><label data-i18n="lbl_write_text">ANDIKA MAANDISHI</label><textarea id="manual-sum-input" placeholder="Bandika maandishi yako hapa... AI itafanya muhtasari." data-i18n-ph="ph_paste_text" rows="5"></textarea></div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-primary" onclick="createManualSummary()"><span data-i18n="btn_summarize">💡 FANYA MUHTASARI</span></button>
+            <button class="btn" onclick="document.getElementById('sum-voice-input').click()"><span data-i18n="btn_voice">🎙️ SAUTI</span></button>
+          </div>
+          <input type="file" id="sum-file-input" style="display:none;" onchange="handleSumFile(event)"/>
+        </div>
+        <div id="sum-result-box" style="display:none;" class="card">
+          <div class="card-title">✨ MUHTASARI WA AI</div>
+          <div id="sum-result-text" style="line-height:1.8;color:var(--text);font-size:13px;"></div>
+          <button class="btn btn-success btn-sm" style="margin-top:12px;" onclick="saveSummaryToList()"><span data-i18n="btn_save_summary">💾 HIFADHI MUHTASARI</span></button>
+        </div>
+        <div class="page-title" style="margin-top:18px;font-size:11px;"><span class="dot"></span><span data-i18n="pt_saved_summaries">SUMMARIES ZILIZOHIFADHIWA</span></div>
+        <div id="summaries-list"></div>
+      </div>
+
+      <!-- ── SCHEDULE ── -->
+      <div id="page-schedule" class="page">
+        <div class="page-title"><span class="dot"></span><span data-i18n="pt_schedule">RATIBA & VIKUMBUSHO</span></div>
+        <div class="card" id="notif-permission-card" style="display:none;">
+          <div class="card-title" data-i18n="ct_notifications">🔔 ARIFA (NOTIFICATIONS)</div>
+          <div style="color:var(--text2);font-size:11px;font-family:var(--font-mono);margin-bottom:10px;" id="notif-status-text"></div>
+          <button class="btn btn-primary btn-full btn-sm" onclick="requestNotifPermission()"><span data-i18n="btn_enable_notif">🔔 WASHA ARIFA</span></button>
+        </div>
+        <div class="card">
+          <div class="card-title" data-i18n="ct_add_event">➕ ONGEZA TUKIO</div>
+          <div class="field"><label data-i18n="lbl_title">KICHWA</label><input type="text" id="event-title" placeholder="k.m. Kipindi cha Hisabati" data-i18n-ph="ph_event_title"/></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
+            <div class="field"><label data-i18n="lbl_date">TAREHE</label><input type="date" id="event-date"/></div>
+            <div class="field"><label data-i18n="lbl_time">MUDA</label><input type="time" id="event-time"/></div>
+          </div>
+          <div class="field"><label data-i18n="lbl_end_time">MUDA WA MWISHO</label><input type="time" id="event-end-time"/></div>
+          <div class="field"><label data-i18n="lbl_desc_optional">MAELEZO (SI LAZIMA)</label><textarea id="event-desc" rows="2" placeholder="Maelezo zaidi kuhusu tukio hili..." data-i18n-ph="ph_event_desc"></textarea></div>
+          <div class="field" style="display:flex;align-items:center;gap:10px;">
+            <input type="checkbox" id="event-reminder" style="width:auto;cursor:pointer;" checked/>
+            <label style="font-family:var(--font-mono);font-size:10px;color:var(--blue);cursor:pointer;" for="event-reminder" data-i18n="lbl_set_reminder">⏰ WEKA KIKUMBUSHO (ARIFA)</label>
+          </div>
+          <button class="btn btn-success btn-full" onclick="addEvent()"><span data-i18n="btn_add_event">✓ ONGEZA TUKIO</span></button>
+        </div>
+        <div class="card">
+          <div class="card-title" data-i18n="ct_upcoming">📅 MATUKIO YAJAYO</div>
+          <div id="events-list"></div>
+        </div>
+      </div>
+
+      <!-- ── DAXON AI ── -->
+      <div id="page-daxon-ai" class="page">
+        <div class="page-title"><span class="dot"></span>DAXON AI ASSISTANT</div>
+        <div class="card">
+          <div id="ai-chat-box"></div>
+          <div id="ai-attachment-chip" style="display:none;align-items:center;gap:8px;background:rgba(0,229,255,.06);border:1px solid var(--border2);border-radius:10px;padding:8px 12px;margin-top:10px;">
+            <span id="ai-attachment-name" style="font-family:var(--font-mono);font-size:10px;color:var(--cyan);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+            <button onclick="clearAiAttachment()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;">✖</button>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <textarea id="ai-question" placeholder="Uliza swali lolote... (Swahili au English)" data-i18n-ph="ph_ask_question" rows="2" style="flex:1;"></textarea>
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <button class="btn btn-primary btn-sm" onclick="askAI()"><span data-i18n="btn_ask">🤖 ULIZA</span></button>
+              <button class="btn btn-sm" onclick="startVoiceAI()">🎙️</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+            <button class="btn btn-sm" onclick="document.getElementById('ai-file-input').click()"><span data-i18n="btn_upload_file">📎 PAKIA FAILI/PICHA</span></button>
+            <button class="btn btn-sm" onclick="toggleWebSearch()" id="web-search-toggle">🌐 Internet: OFF</button>
+            <button class="btn btn-sm" onclick="toggleNotesCtx()" id="notes-ctx-toggle">📚 Notes Context: ON</button>
+            <button class="btn btn-sm btn-danger" onclick="clearChat()"><span data-i18n="btn_clear_chat">🗑 FUTA MAZUNGUMZO</span></button>
+          </div>
+          <input type="file" id="ai-file-input" style="display:none;" accept=".txt,.md,.csv,.json,.pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.png,.jpg,.jpeg,.webp" onchange="handleAiFileAttach(event)"/>
+        </div>
+      </div>
+
+      <!-- ── TRANSLATE ── -->
+      <div id="page-translate" class="page">
+        <div class="page-title"><span class="dot"></span><span data-i18n="pt_translate">TAFSIRI YA LUGHA</span></div>
+        <div class="card">
+          <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;margin-bottom:14px;align-items:end;">
+            <div class="field">
+              <label data-i18n="lbl_from">KUTOKA</label>
+              <select id="lang-from">
+                <option value="Swahili">Swahili</option>
+                <option value="English" selected>English</option>
+                <option value="French">French</option>
+                <option value="Spanish">Spanish</option>
+                <option value="Arabic">Arabic</option>
+                <option value="Chinese">Chinese</option>
+                <option value="German">German</option>
+                <option value="Portuguese">Portuguese</option>
+                <option value="Japanese">Japanese</option>
+                <option value="Korean">Korean</option>
+              </select>
+            </div>
+            <button class="btn btn-sm" onclick="swapLangs()" style="margin-bottom:0;">⇄</button>
+            <div class="field">
+              <label data-i18n="lbl_to">KWENDA</label>
+              <select id="lang-to">
+                <option value="Swahili" selected>Swahili</option>
+                <option value="English">English</option>
+                <option value="French">French</option>
+                <option value="Spanish">Spanish</option>
+                <option value="Arabic">Arabic</option>
+                <option value="Chinese">Chinese</option>
+                <option value="German">German</option>
+                <option value="Portuguese">Portuguese</option>
+                <option value="Japanese">Japanese</option>
+                <option value="Korean">Korean</option>
+              </select>
+            </div>
+          </div>
+          <div class="field"><label data-i18n="lbl_text_to_translate">MAANDISHI YA KUTAFSIRI</label><textarea id="translate-input" placeholder="Andika maandishi hapa..." data-i18n-ph="ph_write_here" rows="4"></textarea></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="doTranslate()"><span data-i18n="btn_translate">✓ TAFSIRI</span></button>
+            <button class="btn" onclick="startTranslateVoice()"><span data-i18n="btn_voice">🎙️ SAUTI</span></button>
+            <button class="btn btn-sm" onclick="copyTranslation()"><span data-i18n="btn_copy">📋 NAKILI</span></button>
+          </div>
+          <div id="translate-loading" style="display:none;text-align:center;padding:20px;color:var(--cyan);"><span class="loading">⟳</span> <span data-i18n="translating">Inatafsiri...</span></div>
+          <div id="translate-result" style="display:none;background:rgba(0,229,255,.04);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:14px;">
+            <div class="card-title" data-i18n="ct_translation">📌 TAFSIRI</div>
+            <div id="translate-output" style="line-height:1.8;color:var(--text);white-space:pre-wrap;font-size:13px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ABOUT ── -->
+      <div id="page-about" class="page">
+        <div class="page-title"><span class="dot"></span><span data-i18n="pt_about">KUHUSU DAXON</span></div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="ct_about_title">🚀 DAXON AI — MSAIDIZI WAKO WA MASOMO</div>
+          <div style="color:var(--text);font-size:13px;line-height:1.9;" data-i18n-html="about_p1"></div>
+          <div style="color:var(--text2);font-size:12px;line-height:1.9;margin-top:10px;" data-i18n-html="about_p2"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="ct_mission">🎯 DHIMA YETU</div>
+          <div style="color:var(--text2);font-size:12px;line-height:1.9;" data-i18n-html="about_mission"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="ct_privacy">🔒 FARAGHA (PRIVACY)</div>
+          <div style="color:var(--text2);font-size:12px;line-height:1.8;margin-bottom:12px;" data-i18n-html="privacy_desc"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(0,229,255,.05);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;">
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--cyan);" data-i18n="privacy_toggle_label">Privacy Mode</span>
+            <label class="switch">
+              <input type="checkbox" id="privacy-toggle" onchange="togglePrivacyMode()"/>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div id="privacy-status-text" style="color:var(--text3);font-size:10px;font-family:var(--font-mono);margin-top:8px;"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="ct_account_info">👤 MAELEZO YA AKAUNTI</div>
+          <div id="about-account-info"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="ct_features">⚙️ VIPENGELE VILIVYOPO</div>
+          <div style="color:var(--text2);font-family:var(--font-mono);font-size:11px;line-height:2.2;">
+            <div>🚀 DAXON Study Platform v3.0</div>
+            <div>📅 Build: 2026</div>
+            <div style="color:var(--green);" data-i18n="feat_ai">✅ DAXON AI — Muhtasari & Majibu ya Haraka (Bila API Key)</div>
+            <div style="color:var(--green);" data-i18n="feat_web">✅ Kuchukua Taarifa Mtandaoni (Wikipedia, DuckDuckGo, Google, Bing)</div>
+            <div style="color:var(--green);" data-i18n="feat_file_ai">✅ Kupakia Faili/Picha kwa AI (Auto-Detect Intent)</div>
+            <div style="color:var(--green);">✅ Document Reader (PDF, DOCX, PPTX, XLSX)</div>
+            <div style="color:var(--green);">✅ Camera Full Access + OCR</div>
+            <div style="color:var(--green);" data-i18n="feat_translate">✅ Tafsiri ya Lugha (10+ Languages)</div>
+            <div style="color:var(--green);" data-i18n="feat_summaries">✅ My Summaries (Save Automatically)</div>
+            <div style="color:var(--green);" data-i18n="feat_schedule">✅ Schedule & Reminders (Push Notifications)</div>
+            <div style="color:var(--green);" data-i18n="feat_notes">✅ Notes Manager</div>
+            <div style="color:var(--green);" data-i18n="feat_lang">✅ Kiswahili / English Language Switch</div>
+            <div style="color:var(--green);" data-i18n="feat_privacy">✅ Privacy Mode (ON/OFF)</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" data-i18n="ct_company">🏢 DAXON TECHNOLOGY</div>
+          <div style="color:var(--text2);font-size:12px;line-height:1.9;" data-i18n-html="about_company"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🗄️ DATABASE INFO</div>
+          <div id="db-info" style="color:var(--text2);font-family:var(--font-mono);font-size:11px;line-height:2;"></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /layout -->
+</div><!-- /app -->
+
+<!-- Hidden inputs -->
+<input type="file" id="file-import-input" style="display:none;" accept=".txt,.pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.json,.csv,.md,.png,.jpg,.jpeg,.webp" onchange="handleFileImport(event)"/>
+<input type="file" id="sum-voice-input" style="display:none;" accept="audio/*"/>
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  DAXON v3.0 — COMPLETE JAVASCRIPT ENGINE
+// ═══════════════════════════════════════════════════════
+
+// ── CONFIG ──
+// DAXON AI requires no API key at all. The entire engine runs inside your
+// browser using text analysis (extractive NLP) and free, no-signup web
+// services (Wikipedia, DuckDuckGo, MyMemory).
+const DAXON_ENGINE_NAME = 'DAXON Local Intelligence Engine v1.0';
+
+// ── I18N (Kiswahili / English language switcher) ──
+const I18N = {
+  sw: {
+    logout: 'LOGOUT',
+    nav_dash: 'DASH', nav_notes: 'NOTES', nav_reader: 'READER', nav_scan: 'SCAN',
+    nav_summ: 'SUMM.', nav_sched: 'RATIBA', nav_ai: 'AI', nav_trans: 'TAFSIRI', nav_info: 'HABARI',
+    pt_dashboard: 'DASHIBODI', lbl_events: 'MATUKIO',
+    ct_recent_notes: '📚 NOTES ZA HIVI KARIBUNI', ct_today_schedule: "📅 RATIBA YA LEO",
+    pt_notes: 'MENEJA WA NOTES', ph_search_notes: 'Tafuta notes...', drop_files: 'TUPA FAILI HAPA AU BONYEZA KUPAKIA',
+    btn_new_note: '➕ NOTE MPYA', pt_write_note: 'ANDIKA NOTE', lbl_title: 'KICHWA', ph_note_title: 'Kichwa cha note...',
+    lbl_content: 'MAUDHUI', ph_write_here: 'Andika hapa...', btn_save: '💾 HIFADHI', btn_close: '✕ FUNGA',
+    btn_edit: '✎ HARIRI', btn_read_aloud: '🔊 SOMA KWA SAUTI',
+    ct_upload_doc: '📤 PAKIA HATI YOYOTE', click_or_drop: 'BONYEZA AU TUPA HAPA',
+    btn_save_as_note: '💾 HIFADHI KAMA NOTE',
+    ct_camera: '📷 KAMERA (FULL ACCESS)', btn_start_cam: '📷 WASHA KAMERA', btn_switch: '🔄 BADILISHA',
+    btn_snap: '📸 PIGA PICHA', btn_stop: '⏹ SIMAMA',
+    ct_upload_img: '📁 PAKIA PICHA / FAILI', click_upload_img: 'BONYEZA KUPAKIA PICHA AU FAILI',
+    ct_scan_result: '📝 MATOKEO YA SCAN', ph_scan_result: 'Matokeo ya OCR/scan yataonekana hapa...',
+    btn_save_note: '💾 HIFADHI NOTE', btn_read: '🔊 SOMA',
+    ct_new_summary: '📝 MUHTASARI MPYA (MANUAL)', lbl_write_text: 'ANDIKA MAANDISHI',
+    ph_paste_text: 'Bandika maandishi yako hapa... AI itafanya muhtasari.',
+    btn_summarize: '💡 FANYA MUHTASARI', btn_voice: '🎙️ SAUTI', btn_save_summary: '💾 HIFADHI MUHTASARI',
+    pt_saved_summaries: 'SUMMARIES ZILIZOHIFADHIWA',
+    pt_schedule: 'RATIBA & VIKUMBUSHO', ct_notifications: '🔔 ARIFA (NOTIFICATIONS)', btn_enable_notif: '🔔 WASHA ARIFA',
+    ct_add_event: '➕ ONGEZA TUKIO', ph_event_title: 'k.m. Kipindi cha Hisabati', lbl_date: 'TAREHE', lbl_time: 'MUDA',
+    lbl_end_time: 'MUDA WA MWISHO', lbl_desc_optional: 'MAELEZO (SI LAZIMA)', ph_event_desc: 'Maelezo zaidi kuhusu tukio hili...',
+    lbl_set_reminder: '⏰ WEKA KIKUMBUSHO (ARIFA)', btn_add_event: '✓ ONGEZA TUKIO', ct_upcoming: '📅 MATUKIO YAJAYO',
+    ph_ask_question: 'Uliza swali lolote... (Swahili au English)', btn_ask: '🤖 ULIZA',
+    btn_upload_file: '📎 PAKIA FAILI/PICHA', btn_clear_chat: '🗑 FUTA MAZUNGUMZO',
+    pt_translate: 'TAFSIRI YA LUGHA', lbl_from: 'KUTOKA', lbl_to: 'KWENDA', lbl_text_to_translate: 'MAANDISHI YA KUTAFSIRI',
+    btn_translate: '✓ TAFSIRI', btn_copy: '📋 NAKILI', translating: 'Inatafsiri...', ct_translation: '📌 TAFSIRI',
+    pt_about: 'KUHUSU DAXON', ct_about_title: '🚀 DAXON AI — MSAIDIZI WAKO WA MASOMO',
+    about_p1: 'DAXON AI ni jukwaa la kisasa la kidijitali lililotengenezwa na <b style="color:var(--cyan);">Daxon Technology</b>, likiwa na lengo la kumsaidia kila mwanafunzi na mjasiriamali mdogo hapa Tanzania kusoma kwa urahisi zaidi, kuelewa haraka, na kufanya kazi kwa ufanisi — bila gharama za ziada wala vitambulisho vya API (API keys).',
+    about_p2: 'Kila zana iliyopo humu — kuanzia kusoma hati, kuchanganua picha, kutafsiri lugha, hadi kufanya muhtasari wa taarifa kutoka mtandaoni — inafanya kazi moja kwa moja kwenye kivinjari chako, kwa haraka na kwa faragha kamili, kwani taarifa zako zote zinabaki kwenye kifaa chako.',
+    ct_mission: '🎯 DHIMA YETU',
+    about_mission: 'Kuwawezesha wanafunzi na wajasiriamali wa Tanzania kupata teknolojia bora ya kisasa kwa lugha yao — Kiswahili — ili elimu na maendeleo yasiwe na vikwazo vya gharama au lugha.',
+    ct_privacy: '🔒 FARAGHA (PRIVACY)',
+    privacy_desc: 'Ukiwasha Privacy Mode, DAXON AI haitatuma tena maombi yoyote kwenda mtandaoni (Wikipedia, DuckDuckGo, Google/Bing, Tafsiri). Kila kitu kitafanyika ndani ya kifaa chako pekee — kwa kutumia Notes zako na faili ulizopakia tu.',
+    privacy_toggle_label: 'Privacy Mode',
+    ct_account_info: '👤 MAELEZO YA AKAUNTI', ct_features: '⚙️ VIPENGELE VILIVYOPO',
+    feat_ai: '✅ DAXON AI — Muhtasari & Majibu ya Haraka (Bila API Key)',
+    feat_web: '✅ Kuchukua Taarifa Mtandaoni (Wikipedia, DuckDuckGo, Google, Bing)',
+    feat_file_ai: '✅ Kupakia Faili/Picha kwa AI (Auto-Detect Intent)',
+    feat_translate: '✅ Tafsiri ya Lugha (10+ Languages)',
+    feat_summaries: '✅ My Summaries (Save Automatically)',
+    feat_schedule: '✅ Schedule & Reminders (Push Notifications)',
+    feat_notes: '✅ Notes Manager',
+    feat_lang: '✅ Kubadili Lugha: Kiswahili / English',
+    feat_privacy: '✅ Privacy Mode (ON/OFF)',
+    ct_company: '🏢 DAXON TECHNOLOGY',
+    about_company: 'Daxon Technology ni kampuni ya teknolojia yenye makao yake Mbeya, Tanzania, ikitoa huduma za uundaji wa programu (software development), usanifu wa michoro (graphic design), msaada wa TEHAMA (IT support), na ukarabati wa vifaa vya kielektroniki. DAXON AI ni mojawapo ya bidhaa zetu zinazolenga kuleta mabadiliko chanya kwa wanafunzi na wajasiriamali.',
+    quick_answer: '⚡ JIBU LA HARAKA:', detailed_info: '📖 MAELEZO YA KINA:', text_too_short: '⚠️ Maandishi ni mafupi mno kufanya muhtasari. Weka maandishi marefu zaidi.',
+    more_details: '📖 Maelezo Zaidi:', source_label: 'Chanzo', from_notes: '📖 Kutoka kwenye Notes zako:', file_label: '📎 Faili'
+  },
+  en: {
+    logout: 'LOGOUT',
+    nav_dash: 'DASH', nav_notes: 'NOTES', nav_reader: 'READER', nav_scan: 'SCAN',
+    nav_summ: 'SUMM.', nav_sched: 'SCHED', nav_ai: 'AI', nav_trans: 'TRANS', nav_info: 'INFO',
+    pt_dashboard: 'DASHBOARD', lbl_events: 'EVENTS',
+    ct_recent_notes: '📚 RECENT NOTES', ct_today_schedule: "📅 TODAY'S SCHEDULE",
+    pt_notes: 'NOTES MANAGER', ph_search_notes: 'Search notes...', drop_files: 'DROP FILES OR CLICK TO IMPORT',
+    btn_new_note: '➕ NEW NOTE', pt_write_note: 'WRITE NOTE', lbl_title: 'TITLE', ph_note_title: 'Note title...',
+    lbl_content: 'CONTENT', ph_write_here: 'Write here...', btn_save: '💾 SAVE', btn_close: '✕ CLOSE',
+    btn_edit: '✎ EDIT', btn_read_aloud: '🔊 READ ALOUD',
+    ct_upload_doc: '📤 UPLOAD ANY DOCUMENT', click_or_drop: 'CLICK OR DROP HERE',
+    btn_save_as_note: '💾 SAVE AS NOTE',
+    ct_camera: '📷 CAMERA (FULL ACCESS)', btn_start_cam: '📷 START CAMERA', btn_switch: '🔄 SWITCH',
+    btn_snap: '📸 TAKE PHOTO', btn_stop: '⏹ STOP',
+    ct_upload_img: '📁 UPLOAD IMAGE / FILE', click_upload_img: 'CLICK TO UPLOAD IMAGE OR FILE',
+    ct_scan_result: '📝 SCAN RESULT', ph_scan_result: 'OCR/scan results will appear here...',
+    btn_save_note: '💾 SAVE NOTE', btn_read: '🔊 READ',
+    ct_new_summary: '📝 NEW SUMMARY (MANUAL)', lbl_write_text: 'WRITE TEXT',
+    ph_paste_text: 'Paste your text here... AI will summarize it.',
+    btn_summarize: '💡 SUMMARIZE', btn_voice: '🎙️ VOICE', btn_save_summary: '💾 SAVE SUMMARY',
+    pt_saved_summaries: 'SAVED SUMMARIES',
+    pt_schedule: 'SCHEDULE & REMINDERS', ct_notifications: '🔔 NOTIFICATIONS', btn_enable_notif: '🔔 ENABLE NOTIFICATIONS',
+    ct_add_event: '➕ ADD EVENT', ph_event_title: 'e.g. Math Class', lbl_date: 'DATE', lbl_time: 'TIME',
+    lbl_end_time: 'END TIME', lbl_desc_optional: 'DESCRIPTION (OPTIONAL)', ph_event_desc: 'More details about this event...',
+    lbl_set_reminder: '⏰ SET REMINDER (NOTIFICATION)', btn_add_event: '✓ ADD EVENT', ct_upcoming: '📅 UPCOMING EVENTS',
+    ph_ask_question: 'Ask any question... (Swahili or English)', btn_ask: '🤖 ASK',
+    btn_upload_file: '📎 UPLOAD FILE/IMAGE', btn_clear_chat: '🗑 CLEAR CHAT',
+    pt_translate: 'LANGUAGE TRANSLATOR', lbl_from: 'FROM', lbl_to: 'TO', lbl_text_to_translate: 'TEXT TO TRANSLATE',
+    btn_translate: '✓ TRANSLATE', btn_copy: '📋 COPY', translating: 'Translating...', ct_translation: '📌 TRANSLATION',
+    pt_about: 'ABOUT DAXON', ct_about_title: '🚀 DAXON AI — YOUR STUDY ASSISTANT',
+    about_p1: 'DAXON AI is a modern digital platform built by <b style="color:var(--cyan);">Daxon Technology</b>, designed to help every student and small business owner in Tanzania study more easily, understand faster, and work more efficiently — with no extra costs and no API keys required.',
+    about_p2: 'Every tool here — from reading documents and scanning images to translating languages and summarizing information from the web — runs directly in your browser, quickly and with complete privacy, since all your data stays on your device.',
+    ct_mission: '🎯 OUR MISSION',
+    about_mission: 'To empower Tanzanian students and entrepreneurs with cutting-edge technology in their own language — so education and progress are never held back by cost or language barriers.',
+    ct_privacy: '🔒 PRIVACY',
+    privacy_desc: "When you turn on Privacy Mode, DAXON AI will stop sending any requests to the internet (Wikipedia, DuckDuckGo, Google/Bing, Translation). Everything will run entirely on your device — using only your Notes and uploaded files.",
+    privacy_toggle_label: 'Privacy Mode',
+    ct_account_info: '👤 ACCOUNT INFO', ct_features: '⚙️ AVAILABLE FEATURES',
+    feat_ai: '✅ DAXON AI — Instant Summaries & Answers (No API Key)',
+    feat_web: '✅ Fetch Info Online (Wikipedia, DuckDuckGo, Google, Bing)',
+    feat_file_ai: '✅ Upload Files/Images to AI (Auto-Detect Intent)',
+    feat_translate: '✅ Language Translation (10+ Languages)',
+    feat_summaries: '✅ My Summaries (Save Automatically)',
+    feat_schedule: '✅ Schedule & Reminders (Push Notifications)',
+    feat_notes: '✅ Notes Manager',
+    feat_lang: '✅ Language Switch: Kiswahili / English',
+    feat_privacy: '✅ Privacy Mode (ON/OFF)',
+    ct_company: '🏢 DAXON TECHNOLOGY',
+    about_company: 'Daxon Technology is a technology company based in Mbeya, Tanzania, offering software development, graphic design, IT support, and electronics repair services. DAXON AI is one of our products aimed at bringing positive change to students and entrepreneurs.',
+    quick_answer: '⚡ QUICK ANSWER:', detailed_info: '📖 DETAILED INFO:', text_too_short: '⚠️ The text is too short to summarize. Please provide longer text.',
+    more_details: '📖 More Details:', source_label: 'Source', from_notes: '📖 From your Notes:', file_label: '📎 File'
+  }
+};
+let currentLang = localStorage.getItem('daxon_lang') || 'sw';
+function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || I18N.sw[key] || key; }
+function applyLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem('daxon_lang', lang);
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(node => { node.textContent = t(node.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(node => { node.placeholder = t(node.getAttribute('data-i18n-ph')); });
+  document.querySelectorAll('[data-i18n-html]').forEach(node => { node.innerHTML = t(node.getAttribute('data-i18n-html')); });
+  const btnSw = el('lang-btn-sw'), btnEn = el('lang-btn-en');
+  if(btnSw && btnEn) {
+    btnSw.classList.toggle('btn-primary', lang === 'sw');
+    btnEn.classList.toggle('btn-primary', lang === 'en');
+  }
+  renderDashboard(); renderNotes(); renderEvents(); renderSummariesList(); updatePrivacyUI();
+}
+
+// ── STATE ──
+let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+let notes = [];
+let events = [];
+let summaries = [];
+let editingNoteId = null;
+let viewingNoteId = null;
+let currentReaderContent = '';
+let currentReaderFileName = '';
+let camStream = null;
+let facingMode = 'environment';
+let webSearchEnabled = false;
+let useNotesContext = true;
+let lastAiSummary = '';
+let privacyMode = localStorage.getItem('daxon_privacy_mode') === 'on';
+
+// ── UTILITIES ──
+const el = id => document.getElementById(id);
+const show = id => { const e = el(id); if(e) e.style.display = ''; };
+const hide = id => { const e = el(id); if(e) e.style.display = 'none'; };
+const uid = () => 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2,9);
+const ts = () => new Date().toLocaleString('sw-TZ', {dateStyle:'short',timeStyle:'short'});
+
+function showToast(msg, type='info') {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.style.borderColor = type==='error' ? 'rgba(255,23,68,.4)' : type==='success' ? 'rgba(0,230,118,.4)' : 'var(--border2)';
+  t.textContent = msg;
+  el('toast-container').appendChild(t);
+  setTimeout(() => t.remove(), 3800);
+}
+
+// ── INTRO ──
+let introInterval;
+function startIntro() {
+  let secs = 10;
+  const fill = el('intro-progress');
+  const timer = el('intro-timer');
+  if(!fill) return;
+  introInterval = setInterval(() => {
+    secs--;
+    const pct = ((10 - secs) / 10) * 100;
+    fill.style.width = pct + '%';
+    if(timer) timer.textContent = secs + 's';
+    if(secs <= 0) { clearInterval(introInterval); skipIntro(); }
+  }, 1000);
+}
+
+function skipIntro() {
+  clearInterval(introInterval);
+  const intro = el('intro-screen');
+  if(intro) { intro.style.opacity = '0'; intro.style.transition = 'opacity 0.5s'; setTimeout(() => intro.remove(), 500); }
+  showAuthOrApp();
+}
+
+function showAuthOrApp() {
+  if(currentUser) {
+    loadUserData();
+    hide('auth-screen');
+    el('app').classList.add('visible');
+    el('topbar-user').textContent = currentUser.fullName;
+    initApp();
+  } else {
+    show('auth-screen');
+    switchAuthTab('login');
+  }
+}
+
+// Start intro when page loads
+startIntro();
+
+// ── AUTH ──
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+  hide('login-form'); hide('register-form');
+  el('auth-error').textContent = '';
+  if(tab === 'login') {
+    show('login-form');
+    document.querySelectorAll('.auth-tab')[0].classList.add('active');
+  } else {
+    show('register-form');
+    document.querySelectorAll('.auth-tab')[1].classList.add('active');
+  }
+}
+
+function loginUser() {
+  const email = el('login-email').value.trim();
+  const pass = el('login-password').value.trim();
+  if(!email || !pass) { el('auth-error').textContent = '⚠️ Jaza sehemu zote'; return; }
+  const users = JSON.parse(localStorage.getItem('daxon_users')) || [];
+  const u = users.find(x => x.email === email && x.password === pass);
+  if(!u) { el('auth-error').textContent = '❌ Email au password si sahihi'; return; }
+  currentUser = u;
+  localStorage.setItem('currentUser', JSON.stringify(u));
+  loadUserData();
+  hide('auth-screen');
+  el('app').classList.add('visible');
+  el('topbar-user').textContent = u.fullName;
+  initApp();
+  showToast('✅ Karibu tena, ' + u.fullName + '!', 'success');
+}
+
+function registerUser() {
+  const name = el('reg-name').value.trim();
+  const email = el('reg-email').value.trim();
+  const phone = el('reg-phone').value.trim();
+  const pass = el('reg-password').value.trim();
+  if(!name || !email || !pass) { el('auth-error').textContent = '⚠️ Jaza sehemu zote'; return; }
+  if(pass.length < 6) { el('auth-error').textContent = '⚠️ Password lazima iwe na herufi 6+'; return; }
+  let users = JSON.parse(localStorage.getItem('daxon_users')) || [];
+  if(users.find(x => x.email === email)) { el('auth-error').textContent = '❌ Email tayari imesajiliwa'; return; }
+  const u = { id: uid(), fullName: name, email, phone, password: pass, joinedAt: ts() };
+  users.push(u);
+  localStorage.setItem('daxon_users', JSON.stringify(users));
+  el('auth-error').style.color = 'var(--green)';
+  el('auth-error').textContent = '✅ Akaunti imetengenezwa! Sasa ingia.';
+  setTimeout(() => { el('auth-error').style.color = ''; switchAuthTab('login'); }, 1500);
+}
+
+function logoutUser() {
+  if(!confirm('Una uhakika unataka kutoka?')) return;
+  stopCamera();
+  localStorage.removeItem('currentUser');
+  location.reload();
+}
+
+// ── DATA MANAGEMENT (DATABASE via localStorage) ──
+function loadUserData() {
+  if(!currentUser) return;
+  notes = JSON.parse(localStorage.getItem('daxon_notes_' + currentUser.id)) || [];
+  events = JSON.parse(localStorage.getItem('daxon_events_' + currentUser.id)) || [];
+  summaries = JSON.parse(localStorage.getItem('daxon_summaries_' + currentUser.id)) || [];
+}
+function saveNotes() { localStorage.setItem('daxon_notes_' + currentUser.id, JSON.stringify(notes)); }
+function saveEvents() { localStorage.setItem('daxon_events_' + currentUser.id, JSON.stringify(events)); }
+function saveSummaries() { localStorage.setItem('daxon_summaries_' + currentUser.id, JSON.stringify(summaries)); }
+
+// ── INIT ──
+function initApp() {
+  updateNotifPermissionUI();
+  applyLanguage(currentLang);
+  setInterval(checkReminders, 60000);
+  setInterval(renderDashboard, 5000);
+}
+
+function goTo(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  el('page-' + page)?.classList.add('active');
+  document.querySelector(`[data-page="${page}"]`)?.classList.add('active');
+  if(page === 'dashboard') renderDashboard();
+  if(page === 'notes') renderNotes();
+  if(page === 'schedule') { renderEvents(); updateNotifPermissionUI(); }
+  if(page === 'about') renderAbout();
+  if(page === 'summaries') renderSummariesList();
+}
+
+// ── DASHBOARD ──
+function renderDashboard() {
+  if(!currentUser) return;
+  el('stat-notes').textContent = notes.length;
+  el('stat-events').textContent = events.length;
+  el('stat-summaries').textContent = summaries.length;
+  const recent = [...notes].reverse().slice(0,3);
+  el('dash-notes-list').innerHTML = recent.length ? recent.map(n => `
+    <div style="padding:8px 0;border-bottom:1px solid rgba(0,229,255,.06);cursor:pointer" onclick="goTo('notes');setTimeout(()=>openNoteReader('${n.id}'),150)">
+      <div style="font-family:var(--font-display);font-size:11px;color:var(--text)">${n.title} <span class="badge ${n.source==='file'?'badge-success':'badge-warning'}">${n.source==='file'?'FILE':'TYPED'}</span></div>
+      <div style="font-size:9px;color:var(--text3);font-family:var(--font-mono)">${n.updatedAt}</div>
+    </div>`).join('') : '<p class="empty">Hakuna notes bado</p>';
+  const today = new Date().toISOString().slice(0,10);
+  const todayEvs = events.filter(e => e.date === today).slice(0,4);
+  el('dash-schedule-list').innerHTML = todayEvs.length ? todayEvs.map(e => `
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,229,255,.06)">
+      <span style="font-size:13px;">${e.title}</span>
+      <span style="color:var(--cyan);font-family:var(--font-mono);font-size:10px;">${e.time}</span>
+    </div>`).join('') : '<p class="empty">Hakuna matukio leo</p>';
+}
+
+// ── NOTES ──
+function triggerFileImport() { el('file-import-input').click(); }
+function dragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+function dropFile(e) { e.preventDefault(); e.currentTarget.classList.remove('drag-over'); const f = e.dataTransfer?.files?.[0]; if(f) readFileAsNote(f); }
+function handleFileImport(e) { const f = e.target.files?.[0]; if(f) readFileAsNote(f); e.target.value = ''; }
+
+async function readFileAsNote(file) {
+  showToast('⏳ Inasoma: ' + file.name);
+  try {
+    const content = await parseFileContent(file);
+    const title = file.name.replace(/\.[^/.]+$/, '');
+    notes.push({ id: uid(), title, content: content || `[Faili tupu: ${file.name}]`, source: 'file', createdAt: ts(), updatedAt: ts() });
+    saveNotes(); renderNotes(); renderDashboard();
+    showToast('✅ Imeingizwa: ' + title, 'success');
+  } catch(err) { showToast('⚠️ Hitilafu: ' + file.name, 'error'); console.error(err); }
+}
+
+async function parseFileContent(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(['txt','md','csv','rtf','json'].includes(ext)) {
+    return await readTextFile(file);
+  } else if(ext === 'pdf') {
+    return await extractPDFText(file);
+  } else if(['docx','doc'].includes(ext)) {
+    return await extractDocxText(file);
+  } else if(['xlsx','xls'].includes(ext)) {
+    return await extractXlsxText(file);
+  } else if(['pptx','ppt'].includes(ext)) {
+    return await extractPptxText(file);
+  } else if(['png','jpg','jpeg','webp'].includes(ext)) {
+    return await extractImageText(file);
+  } else {
+    return await readTextFile(file);
+  }
+}
+
+function readTextFile(f) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = rej; r.readAsText(f, 'UTF-8'); });
+}
+function readArrayBuffer(f) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = rej; r.readAsArrayBuffer(f); });
+}
+
+async function extractPDFText(file) {
+  if(typeof pdfjsLib === 'undefined') return '[PDF.js haipatikani]';
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const buffer = await readArrayBuffer(file);
+  const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+  let text = '';
+  for(let i = 1; i <= Math.min(pdf.numPages, 50); i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(x => x.str).join(' ') + '\n\n';
+  }
+  return text || '[Hakuna maandishi kwenye PDF]';
+}
+
+async function extractDocxText(file) {
+  if(typeof mammoth === 'undefined') return '[Mammoth haipatikani]';
+  const buffer = await readArrayBuffer(file);
+  const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+  return result.value || '[Hakuna maandishi]';
+}
+
+async function extractXlsxText(file) {
+  if(typeof XLSX === 'undefined') return '[SheetJS haipatikani]';
+  const buffer = await readArrayBuffer(file);
+  const wb = XLSX.read(buffer, { type: 'array' });
+  let text = '';
+  wb.SheetNames.forEach(name => {
+    const ws = wb.Sheets[name];
+    text += `=== ${name} ===\n` + XLSX.utils.sheet_to_csv(ws) + '\n\n';
+  });
+  return text;
+}
+
+async function extractPptxText(file) {
+  // PPTX is a ZIP; extract slide XMLs
+  try {
+    const buffer = await readArrayBuffer(file);
+    const uint8 = new Uint8Array(buffer);
+    // Basic text extraction from PPTX ZIP XML
+    const decoder = new TextDecoder('utf-8');
+    const str = decoder.decode(uint8);
+    // Extract text between a:t tags
+    const matches = str.match(/<a:t[^>]*>([^<]+)<\/a:t>/g) || [];
+    const text = matches.map(m => m.replace(/<[^>]+>/g,'')).join('\n');
+    return text || '[Hakuna maandishi kwenye PPTX]';
+  } catch(e) { return '[Hitilafu kusoma PPTX: ' + e.message + ']'; }
+}
+
+async function extractImageText(file) {
+  if(typeof Tesseract === 'undefined') return '[Tesseract haipatikani]';
+  return new Promise((res) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      Tesseract.recognize(reader.result, 'eng+swa')
+        .then(({ data: { text } }) => res(text.trim() || '[Hakuna maandishi kwenye picha]'))
+        .catch(e => res('[OCR Error: ' + e.message + ']'));
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function openNoteEditor(id = null) {
+  editingNoteId = id;
+  const n = id ? notes.find(x => x.id === id) : null;
+  el('note-title-input').value = n?.title || '';
+  el('note-content-input').value = n?.content || '';
+  hide('notes-list-view'); hide('note-reader-inline'); show('note-editor');
+}
+function closeNoteEditor() { hide('note-editor'); show('notes-list-view'); editingNoteId = null; }
+function saveNote() {
+  const t = el('note-title-input').value.trim();
+  const c = el('note-content-input').value.trim();
+  if(!t) { showToast('⚠️ Weka kichwa', 'error'); return; }
+  if(editingNoteId) {
+    notes = notes.map(n => n.id === editingNoteId ? { ...n, title: t, content: c, updatedAt: ts() } : n);
+  } else {
+    notes.push({ id: uid(), title: t, content: c, source: 'typed', createdAt: ts(), updatedAt: ts() });
+  }
+  saveNotes(); closeNoteEditor(); renderNotes(); renderDashboard();
+  showToast('✅ Imehifadhiwa!', 'success');
+}
+function openNoteReader(id) {
+  const n = notes.find(x => x.id === id); if(!n) return;
+  viewingNoteId = id;
+  el('reader-title-inline').textContent = n.title;
+  el('reader-content-inline').textContent = n.content;
+  el('reader-date-inline').textContent = '🕐 ' + n.updatedAt;
+  hide('notes-list-view'); hide('note-editor'); show('note-reader-inline');
+}
+function closeNoteReader() { hide('note-reader-inline'); show('notes-list-view'); viewingNoteId = null; }
+function editCurrentNote() { if(viewingNoteId) { hide('note-reader-inline'); openNoteEditor(viewingNoteId); } }
+function deleteNote(id, e) { e.stopPropagation(); if(!confirm('Futa note hii?')) return; notes = notes.filter(n => n.id !== id); saveNotes(); renderNotes(); renderDashboard(); }
+function speakNote() {
+  if(!viewingNoteId) return;
+  const n = notes.find(x => x.id === viewingNoteId);
+  if(n) speakText(n.content.slice(0, 500));
+}
+async function summarizeCurrentNote() {
+  if(!viewingNoteId) return;
+  const n = notes.find(x => x.id === viewingNoteId); if(!n) return;
+  showToast('💡 DAXON AI inafanya muhtasari...');
+  const sum = formatSummary(n.content.slice(0, 6000));
+  lastAiSummary = sum;
+  const id = uid();
+  summaries.push({ id, title: 'Muhtasari: ' + n.title, content: sum, sourceNote: n.title, createdAt: ts() });
+  saveSummaries(); renderSummariesList();
+  showToast('✅ Muhtasari umehifadhiwa kwenye My Summaries!', 'success');
+  goTo('summaries');
+}
+
+function renderNotes() {
+  const q = (el('notes-search')?.value || '').toLowerCase();
+  const f = notes.filter(n => n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q));
+  el('notes-list').innerHTML = f.length ? [...f].reverse().map(n => `
+    <div class="note-item" onclick="openNoteReader('${n.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:start;">
+        <div class="note-title">${n.title} <span class="badge ${n.source==='file'?'badge-success':'badge-warning'}">${n.source==='file'?'📄':'✎'}</span></div>
+        <button onclick="deleteNote('${n.id}',event)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0;">🗑</button>
+      </div>
+      <div class="note-preview">${n.content.slice(0,90)}...</div>
+      <div class="note-date">${n.updatedAt}</div>
+    </div>`).join('') : '<p class="empty">Hakuna notes. Ingiza au andika mpya.</p>';
+}
+
+// ── DOCUMENT READER ──
+function dropReaderFile(e) { e.preventDefault(); e.currentTarget.classList.remove('drag-over'); const f = e.dataTransfer?.files?.[0]; if(f) readDocumentFileDirectly(f); }
+function readDocumentFile(event) { const f = event.target.files?.[0]; if(f) readDocumentFileDirectly(f); event.target.value = ''; }
+async function readDocumentFileDirectly(file) {
+  showToast('⏳ Inasoma hati: ' + file.name);
+  try {
+    const content = await parseFileContent(file);
+    currentReaderContent = content;
+    currentReaderFileName = file.name;
+    el('doc-reader-content').textContent = content;
+    el('reader-file-info').textContent = `📄 ${file.name} (${Math.round(file.size/1024)}KB)`;
+    hide('reader-summary-box');
+    show('reader-panel');
+    showToast('✅ Hati imefunguliwa!', 'success');
+  } catch(e) { showToast('⚠️ Hitilafu kusoma faili', 'error'); }
+}
+function speakReaderContent() { if(currentReaderContent) speakText(currentReaderContent.slice(0, 600)); }
+async function aiSummarizeReader() {
+  if(!currentReaderContent) { showToast('⚠️ Hakuna hati iliyofunguliwa'); return; }
+  showToast('💡 DAXON AI inafanya muhtasari...');
+  el('reader-summary-text').textContent = '⏳ Subiri...';
+  show('reader-summary-box');
+  const sum = formatSummary(currentReaderContent.slice(0, 8000));
+  el('reader-summary-text').textContent = sum;
+  lastAiSummary = sum;
+}
+function saveReaderAsNote() {
+  if(!currentReaderContent) { showToast('⚠️ Hakuna hati'); return; }
+  const title = currentReaderFileName.replace(/\.[^/.]+$/, '');
+  notes.push({ id: uid(), title, content: currentReaderContent, source: 'file', createdAt: ts(), updatedAt: ts() });
+  saveNotes(); renderNotes(); renderDashboard();
+  showToast('✅ Imehifadhiwa kama note!', 'success');
+}
+function closeReaderPanel() { hide('reader-panel'); currentReaderContent = ''; currentReaderFileName = ''; }
+
+// ── CAMERA / SCANNER ──
+async function startCamera() {
+  try {
+    const constraints = { video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false };
+    camStream = await navigator.mediaDevices.getUserMedia(constraints);
+    const vid = el('camera-stream');
+    vid.srcObject = camStream;
+    vid.style.display = 'block';
+    show('snap-btn'); show('stop-cam-btn'); show('switch-cam-btn');
+    hide('start-cam-btn');
+    el('cam-ocr-status').textContent = '📷 Kamera imewashwa';
+    showToast('📷 Kamera inafanya kazi!', 'success');
+  } catch(e) {
+    showToast('⚠️ Ruhusa ya kamera imekataliwa: ' + e.message, 'error');
+    el('cam-ocr-status').textContent = '❌ Kamera ilikosea: ' + e.message;
+  }
+}
+async function switchCamera() {
+  facingMode = facingMode === 'environment' ? 'user' : 'environment';
+  stopCamera(); await startCamera();
+}
+function stopCamera() {
+  if(camStream) { camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+  el('camera-stream').style.display = 'none';
+  el('camera-stream').srcObject = null;
+  hide('snap-btn'); hide('stop-cam-btn'); hide('switch-cam-btn'); show('start-cam-btn');
+  el('cam-ocr-status').textContent = '';
+}
+function snapPhoto() {
+  const vid = el('camera-stream');
+  const canvas = el('capture-canvas');
+  canvas.width = vid.videoWidth; canvas.height = vid.videoHeight;
+  canvas.getContext('2d').drawImage(vid, 0, 0);
+  stopCamera();
+  el('cam-ocr-status').textContent = '🔍 Inasoma maandishi kwenye picha...';
+  el('scan-text-result').value = '⏳ Inafanya OCR...';
+  if(typeof Tesseract !== 'undefined') {
+    Tesseract.recognize(canvas.toDataURL('image/png'), 'eng+swa')
+      .then(({ data: { text } }) => {
+        el('scan-text-result').value = text.trim() || '[Hakuna maandishi kwenye picha]';
+        el('cam-ocr-status').textContent = '✅ OCR imekamilika';
+        showToast('✅ Maandishi yamesomwa!', 'success');
+      })
+      .catch(e => { el('scan-text-result').value = '[OCR error: ' + e.message + ']'; });
+  }
+}
+function handleScanFile(e) {
+  const f = e.target.files?.[0]; if(!f) return;
+  e.target.value = '';
+  el('scan-text-result').value = '⏳ Inasoma...';
+  const ext = f.name.split('.').pop().toLowerCase();
+  if(['png','jpg','jpeg','webp'].includes(ext)) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if(typeof Tesseract !== 'undefined') {
+        Tesseract.recognize(reader.result, 'eng+swa').then(({ data: { text } }) => {
+          el('scan-text-result').value = text.trim() || '[Hakuna maandishi]';
+          showToast('✅ OCR imekamilika!', 'success');
+        });
+      }
+    };
+    reader.readAsDataURL(f);
+  } else {
+    parseFileContent(f).then(text => { el('scan-text-result').value = text; });
+  }
+}
+async function aiSummarizeScan() {
+  const txt = el('scan-text-result').value.trim();
+  if(!txt) { showToast('⚠️ Hakuna maandishi'); return; }
+  showToast('💡 DAXON AI inafanya muhtasari...');
+  el('scan-summary-text').textContent = '⏳ Subiri...';
+  show('scan-summary');
+  const sum = formatSummary(txt.slice(0, 6000));
+  el('scan-summary-text').textContent = sum;
+  lastAiSummary = sum;
+}
+function saveScanAsNote() {
+  const txt = el('scan-text-result').value.trim();
+  if(!txt) { showToast('⚠️ Hakuna maandishi'); return; }
+  notes.push({ id: uid(), title: 'Scan - ' + ts(), content: txt, source: 'scan', createdAt: ts(), updatedAt: ts() });
+  saveNotes(); renderNotes(); renderDashboard();
+  showToast('✅ Imehifadhiwa kama note!', 'success');
+}
+function speakScan() { const t = el('scan-text-result').value; if(t) speakText(t.slice(0,500)); }
+
+// ── MY SUMMARIES ──
+async function createManualSummary() {
+  const txt = el('manual-sum-input').value.trim();
+  if(!txt) { showToast('⚠️ Andika maandishi kwanza'); return; }
+  showToast('💡 DAXON AI inafanya muhtasari...');
+  el('sum-result-text').textContent = '⏳ Subiri...';
+  show('sum-result-box');
+  const sum = formatSummary(txt.slice(0, 8000));
+  el('sum-result-text').textContent = sum;
+  lastAiSummary = sum;
+}
+async function handleSumFile(e) {
+  const f = e.target.files?.[0]; if(!f) return;
+  e.target.value = '';
+  showToast('⏳ Inasoma faili...');
+  const content = await parseFileContent(f);
+  el('manual-sum-input').value = content.slice(0, 5000);
+  showToast('✅ Faili imesomwa. Bonyeza Fanya Muhtasari.', 'success');
+}
+function saveSummaryToList() {
+  const sum = el('sum-result-text').textContent.trim();
+  if(!sum || sum === '⏳ Subiri...') { showToast('⚠️ Hakuna muhtasari'); return; }
+  const src = el('manual-sum-input').value.slice(0,60) + '...';
+  summaries.push({ id: uid(), title: 'Muhtasari ' + (summaries.length+1), content: sum, source: src, createdAt: ts() });
+  saveSummaries(); renderSummariesList();
+  showToast('✅ Muhtasari umehifadhiwa!', 'success');
+  el('manual-sum-input').value = '';
+  hide('sum-result-box');
+}
+function renderSummariesList() {
+  const container = el('summaries-list');
+  if(!container) return;
+  container.innerHTML = summaries.length ? [...summaries].reverse().map(s => `
+    <div class="summary-item">
+      <div style="display:flex;justify-content:space-between;align-items:start;">
+        <div class="summary-item-title">${s.title}</div>
+        <button onclick="deleteSummary('${s.id}',event)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;">🗑</button>
+      </div>
+      <div class="summary-item-date">🕐 ${s.createdAt}</div>
+      <div class="summary-item-preview">${s.content.slice(0,150)}...</div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+        <button class="btn btn-sm" onclick="speakText('${s.content.replace(/'/g,"&#39;").slice(0,400)}')">🔊 SOMA</button>
+        <button class="btn btn-sm btn-success" onclick="copySummary('${s.id}')">📋 NAKILI</button>
+      </div>
+    </div>`).join('') : '<p class="empty">Hakuna summaries bado. Fanya muhtasari wa document.</p>';
+}
+function deleteSummary(id, e) { e.stopPropagation(); if(!confirm('Futa muhtasari?')) return; summaries = summaries.filter(s => s.id !== id); saveSummaries(); renderSummariesList(); renderDashboard(); }
+function copySummary(id) { const s = summaries.find(x => x.id === id); if(s) { navigator.clipboard?.writeText(s.content).then(() => showToast('✅ Imenakiliwa!','success')); } }
+
+// ── SCHEDULE ──
+function notifBody(e) {
+  let body = `🕐 ${e.date} saa ${e.time}${e.endTime ? ' – ' + e.endTime : ''}`;
+  if(e.desc) body += `\n📝 ${e.desc}`;
+  return body;
+}
+function addEvent() {
+  const t = el('event-title').value.trim();
+  const d = el('event-date').value;
+  const tm = el('event-time').value;
+  const etm = el('event-end-time').value;
+  const desc = el('event-desc').value.trim();
+  const rem = el('event-reminder').checked;
+  if(!t || !d || !tm) { showToast('⚠️ Jaza sehemu zote zinazohitajika', 'error'); return; }
+  const newEvent = { id: uid(), title: t, date: d, time: tm, endTime: etm, desc, reminder: rem, notified: false, createdAt: ts() };
+  events.push(newEvent);
+  saveEvents(); renderEvents(); renderDashboard();
+  el('event-title').value = ''; el('event-date').value = ''; el('event-time').value = ''; el('event-end-time').value = ''; el('event-desc').value = ''; el('event-reminder').checked = true;
+  showToast('✅ Tukio limeongezwa!', 'success');
+  if(rem) {
+    if(Notification?.permission === 'granted') {
+      new Notification('⏰ DAXON — Kikumbusho Kimewekwa: ' + t, { body: notifBody(newEvent) });
+    } else if(Notification && Notification.permission !== 'denied') {
+      showToast('🔔 Washa arifa (kwenye kadi ya juu) ili upate taarifa wakati tukio linapofika', 'warning');
+    }
+  }
+}
+function deleteEvent(id, e) { e.stopPropagation(); if(!confirm('Futa tukio?')) return; events = events.filter(x => x.id !== id); saveEvents(); renderEvents(); renderDashboard(); }
+function renderEvents() {
+  el('events-list').innerHTML = events.length ? [...events].sort((a,b) => new Date(a.date+' '+a.time) - new Date(b.date+' '+b.time)).map(e => `
+    <div class="event-item">
+      <div class="event-title">${e.title} ${e.reminder ? '<span class="badge badge-success">⏰</span>' : ''}</div>
+      <div class="event-time">📅 ${e.date} · ${e.time}${e.endTime ? ' – ' + e.endTime : ''}</div>
+      ${e.desc ? `<div style="color:var(--text2);font-size:11px;font-family:var(--font-mono);margin-top:6px;">📝 ${e.desc}</div>` : ''}
+      <button onclick="deleteEvent('${e.id}',event)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;margin-top:6px;font-family:var(--font-mono);">🗑 FUTA</button>
+    </div>`).join('') : '<p class="empty">Hakuna matukio bado</p>';
+}
+function checkReminders() {
+  const now = new Date();
+  let changed = false;
+  events.forEach(e => {
+    if(!e.reminder || e.notified) return;
+    const evt = new Date(e.date + 'T' + e.time);
+    if(now >= evt && (now - evt) < 5 * 60000) {
+      if(Notification?.permission === 'granted') {
+        new Notification('⏰ DAXON — ' + e.title, { body: notifBody(e), requireInteraction: true });
+      }
+      e.notified = true;
+      changed = true;
+    }
+  });
+  if(changed) saveEvents();
+}
+function updateNotifPermissionUI() {
+  const card = el('notif-permission-card');
+  const statusText = el('notif-status-text');
+  if(!card || !window.Notification) { if(card) card.style.display = 'none'; return; }
+  if(Notification.permission === 'granted') {
+    card.style.display = 'none';
+  } else {
+    card.style.display = 'block';
+    statusText.textContent = Notification.permission === 'denied'
+      ? '⚠️ Umezuia arifa kwenye kivinjari. Ili kupokea vikumbusho, ruhusu arifa kwenye mipangilio ya kivinjari chako kwa tovuti hii.'
+      : 'Washa arifa ili upate taarifa (notification) wakati kikumbusho chako kinapofika, ikijumuisha kichwa, muda, na maelezo uliyojaza.';
+  }
+}
+function requestNotifPermission() {
+  if(!window.Notification) { showToast('⚠️ Kivinjari hiki hakitumii arifa', 'error'); return; }
+  Notification.requestPermission().then(perm => {
+    updateNotifPermissionUI();
+    if(perm === 'granted') showToast('✅ Arifa zimewashwa!', 'success');
+    else if(perm === 'denied') showToast('⚠️ Umezuia arifa', 'error');
+  });
+}
+
+// ── DAXON LOCAL INTELLIGENCE ENGINE (No API Key Required) ──
+// This engine handles all "AI" tasks — summarization, answering questions,
+// and looking up information online — using text analysis (extractive NLP:
+// frequency scoring) combined with free web services (Wikipedia REST API,
+// MyMemory Translation API) that require no signup or secret API keys.
+
+const STOPWORDS = new Set([
+  'na','ya','wa','za','la','kwa','ni','katika','kuwa','hii','hiyo','huo','hicho','hili','yake','wake','zake','lake',
+  'kama','lakini','au','pia','sana','hata','ili','baada','kabla','wakati','kila','watu','mtu','hivyo','hayo','haya',
+  'ndani','nje','juu','chini','bila','kwenye','zaidi','tu','je','ndiyo','hapana','vile','vilevile','ambaye','ambao',
+  'ambayo','yote','wote','zote','wa','za','moja','mbili','tatu','huu','huyu','hawa','yeye','sisi','ninyi','wao',
+  'the','a','an','and','or','of','to','in','on','for','is','are','was','were','be','been','this','that','these',
+  'those','with','as','by','at','from','it','its',"it's",'which','who','whom','but','if','then','than','so','such',
+  'not','no','can','will','would','should','could','has','have','had','do','does','did','you','your','i','we','our',
+  'they','their','he','she','him','her','his','my','me','us','them','what','when','where','why','how','all','also'
+]);
+
+function splitSentences(text) {
+  const clean = (text || '').replace(/\s+/g, ' ').trim();
+  if(!clean) return [];
+  return clean.split(/(?<=[.!?])\s+(?=[A-Z0-9À-ÿ])/).map(s => s.trim()).filter(s => s.length > 2);
+}
+function tokenize(s) {
+  return (s.toLowerCase().match(/[a-zà-ÿ']+/g) || []).filter(w => w.length > 2 && !STOPWORDS.has(w));
+}
+// Extractive summarizer - returns a "quick answer" (1 sentence)
+// and "detailed info" (several key sentences), using no API at all.
+function extractiveSummarize(text, opts) {
+  opts = opts || {};
+  const quickCount = opts.quickCount || 1;
+  const detailedCount = opts.detailedCount || 6;
+  const sentences = splitSentences(text);
+  if(sentences.length === 0) return { quick: '', detailed: '', sentences: [] };
+  if(sentences.length <= quickCount) return { quick: sentences.join(' '), detailed: sentences.join(' '), sentences };
+  const freq = {};
+  sentences.forEach(s => tokenize(s).forEach(w => freq[w] = (freq[w] || 0) + 1));
+  const maxFreq = Math.max(...Object.values(freq), 1);
+  Object.keys(freq).forEach(w => freq[w] = freq[w] / maxFreq);
+  const scored = sentences.map((s, idx) => {
+    const words = tokenize(s);
+    const sum = words.reduce((a, w) => a + (freq[w] || 0), 0);
+    const posBonus = idx === 0 ? 0.4 : (idx < 3 ? 0.15 : 0);
+    const score = words.length ? (sum / Math.sqrt(words.length)) + posBonus : 0;
+    return { s, idx, score };
+  }).sort((a, b) => b.score - a.score);
+  const quickTop = scored.slice(0, quickCount).sort((a, b) => a.idx - b.idx).map(o => o.s);
+  const detailedTop = scored.slice(0, Math.min(detailedCount, sentences.length)).sort((a, b) => a.idx - b.idx).map(o => o.s);
+  return { quick: quickTop.join(' '), detailed: detailedTop.join(' '), sentences };
+}
+// Finds the sentences that best match a given question/keyword within the text
+function extractRelevant(text, query, count) {
+  const sentences = splitSentences(text);
+  if(sentences.length === 0) return '';
+  const qWords = new Set(tokenize(query));
+  const scored = sentences.map((s, idx) => {
+    const words = tokenize(s);
+    const overlap = qWords.size ? words.filter(w => qWords.has(w)).length : 0;
+    const score = overlap / Math.sqrt(words.length + 1);
+    return { s, idx, score };
+  }).sort((a, b) => b.score - a.score);
+  const best = scored.filter(o => o.score > 0).slice(0, count);
+  const chosen = (best.length ? best : scored.slice(0, count)).sort((a, b) => a.idx - b.idx);
+  return chosen.map(o => o.s).join(' ');
+}
+// Extractive summary formatted as "Quick Answer" + "Detailed Info" - no API needed
+function formatSummary(text) {
+  const clean = (text || '').trim();
+  if(clean.length < 20) return t('text_too_short');
+  const r = extractiveSummarize(clean, { quickCount: 1, detailedCount: 6 });
+  return `${t('quick_answer')}\n${r.quick}\n\n${t('detailed_info')}\n${r.detailed}`;
+}
+// Cleans the question by removing question words (what is, ni nini, etc.) to find the real topic
+function daxonCleanQuery(query) {
+  return query
+    .replace(/^(what\s+is|what\s+are|what\s+was|who\s+is|who\s+are|define|explain|tell\s+me\s+about)\s+/i, '')
+    .replace(/^(ni\s+nini\s+maana\s+ya|nini\s+maana\s+ya|eleza\s+kuhusu|niambie\s+kuhusu|habari\s+kuhusu|ni\s+kitu\s+gani|maana\s+ya)\s+/i, '')
+    .replace(/\?+$/, '')
+    .trim() || query;
+}
+// Uses Wikipedia OpenSearch to find the correct page title before fetching the summary
+async function daxonWikiSearchTitle(query, lang) {
+  try {
+    const res = await fetch(`https://${lang}.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=1&namespace=0&format=json&origin=*`);
+    if(!res.ok) return null;
+    const data = await res.json();
+    return (data && data[1] && data[1][0]) || null;
+  } catch(e) { return null; }
+}
+// ── PRIVACY MODE ──
+// When enabled, DAXON AI blocks all outbound network calls (Wikipedia,
+// DuckDuckGo, Google/Bing links, MyMemory translation) and only uses
+// on-device data (Notes and uploaded files).
+function togglePrivacyMode() {
+  privacyMode = el('privacy-toggle').checked;
+  localStorage.setItem('daxon_privacy_mode', privacyMode ? 'on' : 'off');
+  updatePrivacyUI();
+  showToast(privacyMode ? '🔒 Privacy Mode: ON' : '🔓 Privacy Mode: OFF', 'success');
+}
+function updatePrivacyUI() {
+  const toggle = el('privacy-toggle');
+  const statusText = el('privacy-status-text');
+  if(toggle) toggle.checked = privacyMode;
+  if(statusText) {
+    statusText.textContent = privacyMode
+      ? (currentLang === 'sw' ? '🔒 Imewashwa: hakuna taarifa itakayotumwa mtandaoni.' : '🔒 Enabled: no data will be sent to the internet.')
+      : (currentLang === 'sw' ? '🔓 Imezimwa: vyanzo vya mtandaoni vinapatikana kama kawaida.' : '🔓 Disabled: online sources are available as usual.');
+  }
+}
+// Fetch information online without an API key - Wikipedia REST API (Swahili, then English)
+async function daxonWebLookup(query) {
+  if(privacyMode) return null;
+  const cleanQuery = daxonCleanQuery(query);
+  const tryWiki = async (lang) => {
+    try {
+      const foundTitle = await daxonWikiSearchTitle(cleanQuery, lang);
+      const title = foundTitle || cleanQuery;
+      const res = await fetch(`https://${lang}.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+      if(!res.ok) return null;
+      const d = await res.json();
+      if(d.extract && d.extract.length > 10) {
+        return { extract: d.extract, title: d.title || title, url: d.content_urls?.desktop?.page || '', source: lang === 'sw' ? 'Wikipedia (Kiswahili)' : 'Wikipedia (English)' };
+      }
+      return null;
+    } catch(e) { return null; }
+  };
+  // Extra source without an API key: DuckDuckGo Instant Answer API
+  const tryDuckDuckGo = async () => {
+    try {
+      const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(cleanQuery)}&format=json&no_html=1&skip_disambig=1&t=daxonai`);
+      if(!res.ok) return null;
+      const d = await res.json();
+      const text = d.AbstractText || d.Answer || (d.RelatedTopics && d.RelatedTopics[0] && d.RelatedTopics[0].Text) || '';
+      if(text && text.length > 10) {
+        return { extract: text, title: d.Heading || cleanQuery, url: d.AbstractURL || '', source: 'DuckDuckGo' };
+      }
+      return null;
+    } catch(e) { return null; }
+  };
+  return (await tryWiki('sw')) || (await tryWiki('en')) || (await tryDuckDuckGo());
+}
+// Links to open more results on popular search engines (the user clicks them,
+// they are not API calls - just new browser tabs, so no API key or payment needed)
+function daxonExternalSearchLinks(query) {
+  const q = encodeURIComponent(query);
+  return `
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+      <a class="btn btn-sm" style="text-decoration:none;" href="https://www.google.com/search?q=${q}" target="_blank" rel="noopener">🔎 Google</a>
+      <a class="btn btn-sm" style="text-decoration:none;" href="https://www.bing.com/search?q=${q}" target="_blank" rel="noopener">🔎 Bing</a>
+    </div>`;
+}
+
+// ── AI TUTOR (Injini ya Ndani - Bila API Key) ──
+let aiMessages = [];
+let aiAttachedContent = '';
+let aiAttachedFileName = '';
+const SW_LANG_HINTS = ['na','ya','wa','za','kwa','ni','katika','kuwa','hii','hiyo','wakati','baada','kabla','watu','mtu','ili','kwamba','ambayo','ambaye','yake','wake'];
+const EN_LANG_HINTS = ['the','and','is','are','was','were','of','to','in','on','for','this','that','with','which','have','has'];
+function daxonDetectLanguage(text) {
+  const words = (text || '').toLowerCase().match(/[a-z]+/g) || [];
+  let sw = 0, en = 0;
+  words.forEach(w => { if(SW_LANG_HINTS.includes(w)) sw++; if(EN_LANG_HINTS.includes(w)) en++; });
+  return sw >= en ? 'Swahili' : 'English';
+}
+// Detects the user's "intent" from their question about the uploaded file
+function daxonDetectIntent(question) {
+  const q = (question || '').toLowerCase();
+  if(/tafsiri|translate/.test(q)) return 'translate';
+  if(/muhtasari|fupisha|kwa\s*ufupi|summarize|summary/.test(q)) return 'summarize';
+  if(/soma\s*maandishi|nini\s*kimeandikwa|maandishi\s*yote|onyesha\s*maandishi|extract\s*text|toa\s*maandishi/.test(q)) return 'extract';
+  return 'answer';
+}
+// Analyzes the uploaded file and answers based on the user's intent - no API key needed
+async function daxonAnswerFromFile(question, content, fileName) {
+  const label = `📎 <b>${t('file_label')}: ${fileName}</b><br><br>`;
+  if(!content || content.trim().length < 5) {
+    return label + (currentLang === 'sw' ? '⚠️ Sikuweza kusoma maandishi yoyote kwenye faili hili.' : "⚠️ I couldn't read any text from this file.");
+  }
+  const intent = daxonDetectIntent(question);
+  if(intent === 'summarize') {
+    return label + formatSummary(content.slice(0, 8000)).replace(/\n/g, '<br>');
+  }
+  if(intent === 'extract') {
+    const preview = content.slice(0, 2000);
+    const extractLabel = currentLang === 'sw' ? '📝 <b>Maandishi Yaliyotambuliwa:</b><br>' : '📝 <b>Extracted Text:</b><br>';
+    return label + extractLabel + preview.replace(/\n/g, '<br>') + (content.length > 2000 ? '...' : '');
+  }
+  if(intent === 'translate') {
+    const sourceLang = daxonDetectLanguage(content);
+    let targetLang = sourceLang === 'Swahili' ? 'English' : 'Swahili';
+    if(/kiingereza|to\s*english/.test(question.toLowerCase())) targetLang = 'English';
+    if(/kiswahili|to\s*swahili/.test(question.toLowerCase())) targetLang = 'Swahili';
+    const translated = await daxonTranslate(content.slice(0, 1900), sourceLang, targetLang);
+    const translLabel = currentLang === 'sw' ? '🌐 <b>Tafsiri' : '🌐 <b>Translation';
+    return label + `${translLabel} (${sourceLang} → ${targetLang}):</b><br>` + translated.replace(/\n/g, '<br>');
+  }
+  const quick = extractRelevant(content, question, 1);
+  const detailed = extractRelevant(content, question, 5);
+  if(detailed && tokenize(detailed).length > 0) {
+    const fromFileLabel = currentLang === 'sw' ? '📖 <b>Maelezo Zaidi kutoka Failini:</b><br>' : '📖 <b>More Details from the File:</b><br>';
+    return label + `<b>${t('quick_answer').replace(':','').trim()}:</b><br>${quick}<br><br>${fromFileLabel}${detailed}`;
+  }
+  return label + (currentLang === 'sw'
+    ? `🤔 Sikuona sehemu inayolingana moja kwa moja na swali lako ndani ya faili hili. Jaribu maneno mengine, au niombe "fanya muhtasari".`
+    : `🤔 I couldn't find a section that directly matches your question in this file. Try different words, or ask me to "summarize".`);
+}
+async function handleAiFileAttach(e) {
+  const f = e.target.files?.[0];
+  e.target.value = '';
+  if(!f) return;
+  const chatBox = el('ai-chat-box');
+  chatBox.innerHTML += `<div class="ai-msg ai-msg-user"><div class="ai-msg-label">👤 WEWE</div>📎 Umepakia faili: <b>${f.name}</b></div>`;
+  chatBox.innerHTML += `<div class="ai-msg ai-msg-bot" id="ai-typing"><div class="ai-msg-label">🤖 DAXON AI</div><span class="loading">⟳</span> Inasoma na kuchanganua faili...</div>`;
+  chatBox.scrollTop = chatBox.scrollHeight;
+  try {
+    const content = await parseFileContent(f);
+    aiAttachedContent = content;
+    aiAttachedFileName = f.name;
+    updateAiAttachmentChip();
+    const summary = formatSummary(content.slice(0, 8000));
+    const answer = `📎 <b>Nimesoma faili: ${f.name}</b><br><br>${summary.replace(/\n/g, '<br>')}<br><br>💬 <i>Sasa uliza chochote kuhusu faili hili — mfano "fanya muhtasari", "tafsiri kwa kiingereza", au swali lolote mahususi.</i>`;
+    const typing = el('ai-typing');
+    if(typing) typing.outerHTML = `<div class="ai-msg ai-msg-bot"><div class="ai-msg-label">🤖 DAXON AI</div>${answer}</div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+    showToast('✅ Faili limesomwa!', 'success');
+  } catch(err) {
+    const typing = el('ai-typing');
+    if(typing) typing.outerHTML = `<div class="ai-msg ai-msg-bot"><div class="ai-msg-label">🤖 DAXON AI</div>⚠️ Nimeshindwa kusoma faili hili. Jaribu faili jingine.</div>`;
+  }
+}
+function updateAiAttachmentChip() {
+  const chip = el('ai-attachment-chip');
+  if(!chip) return;
+  if(aiAttachedContent) {
+    chip.style.display = 'flex';
+    el('ai-attachment-name').textContent = '📎 ' + aiAttachedFileName;
+  } else {
+    chip.style.display = 'none';
+  }
+}
+function clearAiAttachment() {
+  aiAttachedContent = ''; aiAttachedFileName = '';
+  updateAiAttachmentChip();
+  showToast('🗑 Faili limeondolewa');
+}
+
+async function askAI() {
+  const q = el('ai-question').value.trim();
+  if(!q) return;
+  el('ai-question').value = '';
+  const chatBox = el('ai-chat-box');
+  chatBox.innerHTML += `<div class="ai-msg ai-msg-user"><div class="ai-msg-label">👤 WEWE</div>${q}</div>`;
+  chatBox.innerHTML += `<div class="ai-msg ai-msg-bot" id="ai-typing"><div class="ai-msg-label">🤖 DAXON AI</div><span class="loading">⟳</span> Inatafuta na kuchanganua...</div>`;
+  chatBox.scrollTop = chatBox.scrollHeight;
+
+  let answer;
+  if(aiAttachedContent) {
+    answer = await daxonAnswerFromFile(q, aiAttachedContent, aiAttachedFileName);
+  } else if(webSearchEnabled && privacyMode) {
+    answer = currentLang === 'sw'
+      ? `🔒 Privacy Mode iko ON — DAXON AI haiwezi kutafuta mtandaoni. Zima Privacy Mode kwenye ukurasa wa About, au tumia 📚 Notes Context badala yake.`
+      : `🔒 Privacy Mode is ON — DAXON AI cannot search online. Turn it off on the About page, or use 📚 Notes Context instead.`;
+  } else if(webSearchEnabled) {
+    const web = await daxonWebLookup(q);
+    if(web) {
+      const quick = extractRelevant(web.extract, q, 1) || splitSentences(web.extract)[0] || web.extract;
+      const detailed = extractRelevant(web.extract, q, 4) || web.extract;
+      answer = `<b>${t('quick_answer')}</b><br>${quick}<br><br><b>${t('more_details')}</b><br>${detailed}<br><br>🔗 <i>${t('source_label')}: ${web.source} — ${web.title}</i>${daxonExternalSearchLinks(q)}`;
+    } else {
+      answer = (currentLang === 'sw'
+        ? `⚠️ Sikuweza kupata taarifa mtandaoni kuhusu "${q}" kwenye vyanzo vyetu vya bure (Wikipedia/DuckDuckGo). Jaribu matokeo kamili hapa chini:`
+        : `⚠️ I couldn't find online information about "${q}" in our free sources (Wikipedia/DuckDuckGo). Try the full results below:`) + daxonExternalSearchLinks(q);
+    }
+  } else if(useNotesContext && notes.length > 0) {
+    const combined = notes.slice(-6).map(n => n.title + '. ' + n.content).join(' ');
+    const relevant = extractRelevant(combined, q, 5);
+    if(relevant && tokenize(relevant).length > 0) {
+      const quick = extractRelevant(combined, q, 1);
+      answer = `<b>${t('quick_answer')}</b><br>${quick}<br><br><b>${t('from_notes')}</b><br>${relevant}`;
+    } else {
+      answer = currentLang === 'sw'
+        ? `🤔 Sikupata jibu la moja kwa moja kwenye Notes zako kuhusu "${q}". Washa <b>🌐 Internet</b> ili nitafute mtandaoni, au andika notes zenye taarifa zaidi kuhusu mada hii.`
+        : `🤔 I couldn't find a direct answer in your Notes about "${q}". Turn on <b>🌐 Internet</b> so I can search online, or write notes with more information on this topic.`;
+    }
+  } else {
+    answer = currentLang === 'sw'
+      ? `💡 Washa <b>🌐 Internet</b> ili nikutafutie taarifa mtandaoni kuhusu "${q}", au washa <b>📚 Notes Context</b> ili nichanganue notes ulizoshaandika.`
+      : `💡 Turn on <b>🌐 Internet</b> so I can find information online about "${q}", or turn on <b>📚 Notes Context</b> so I can analyze the notes you've already written.`;
+  }
+
+  const typing = el('ai-typing');
+  if(typing) typing.outerHTML = `<div class="ai-msg ai-msg-bot"><div class="ai-msg-label">🤖 DAXON AI</div>${answer}</div>`;
+  chatBox.scrollTop = chatBox.scrollHeight;
+  aiMessages.push({ user: q, bot: answer });
+}
+
+function startVoiceAI() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) { showToast('⚠️ Sauti haionekani kwenye kivinjari hiki', 'error'); return; }
+  const r = new SR();
+  r.lang = 'sw-TZ';
+  r.onresult = e => { el('ai-question').value = e.results[0][0].transcript; askAI(); };
+  r.onerror = () => showToast('⚠️ Hitilafu ya maikrofoni', 'error');
+  r.start();
+  showToast('🎙️ Sema sasa...');
+}
+function toggleWebSearch() {
+  webSearchEnabled = !webSearchEnabled;
+  el('web-search-toggle').textContent = `🌐 Internet: ${webSearchEnabled ? 'ON' : 'OFF'}`;
+  el('web-search-toggle').style.borderColor = webSearchEnabled ? 'rgba(0,230,118,.4)' : '';
+  el('web-search-toggle').style.color = webSearchEnabled ? 'var(--green)' : '';
+}
+function toggleNotesCtx() {
+  useNotesContext = !useNotesContext;
+  el('notes-ctx-toggle').textContent = `📚 Notes Context: ${useNotesContext ? 'ON' : 'OFF'}`;
+}
+function clearChat() { el('ai-chat-box').innerHTML = ''; aiMessages = []; showToast('🗑 Mazungumzo yamefutwa'); }
+
+// ── TRANSLATION ──
+function swapLangs() {
+  const from = el('lang-from'), to = el('lang-to');
+  [from.value, to.value] = [to.value, from.value];
+  const inp = el('translate-input'), out = el('translate-output');
+  if(out.textContent) { const tmp = inp.value; inp.value = out.textContent; out.textContent = tmp; }
+}
+const DAXON_LANG_CODES = { Swahili: 'sw', English: 'en', French: 'fr', Spanish: 'es', Arabic: 'ar', Chinese: 'zh-CN', German: 'de', Portuguese: 'pt', Japanese: 'ja', Korean: 'ko' };
+// Translate without an API key - uses the free MyMemory Translation API (no signup required)
+async function daxonTranslate(text, fromName, toName) {
+  const from = DAXON_LANG_CODES[fromName] || 'en';
+  const to = DAXON_LANG_CODES[toName] || 'sw';
+  if(from === to) return text;
+  if(privacyMode) {
+    return currentLang === 'sw'
+      ? '🔒 Privacy Mode iko ON — tafsiri ya mtandaoni imezimwa. Zima Privacy Mode kwenye About ili kutumia tafsiri.'
+      : '🔒 Privacy Mode is ON — online translation is disabled. Turn it off in the About page to use translation.';
+  }
+  try {
+    const parts = [];
+    let remaining = text;
+    while(remaining.length > 0) { parts.push(remaining.slice(0, 480)); remaining = remaining.slice(480); }
+    const out = [];
+    for(const part of parts) {
+      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(part)}&langpair=${from}|${to}`);
+      const data = await res.json();
+      out.push(data.responseData?.translatedText || part);
+    }
+    return out.join(' ');
+  } catch(e) { return '⚠️ Hitilafu ya mtandao wakati wa kutafsiri. Hakikisha uko online.'; }
+}
+async function doTranslate() {
+  const t = el('translate-input').value.trim();
+  const from = el('lang-from').value, to = el('lang-to').value;
+  if(!t) { showToast('⚠️ Andika maandishi kwanza'); return; }
+  hide('translate-result'); show('translate-loading');
+  const result = await daxonTranslate(t, from, to);
+  el('translate-output').textContent = result;
+  hide('translate-loading'); show('translate-result');
+}
+function startTranslateVoice() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) { showToast('⚠️ Sauti haionekani'); return; }
+  const r = new SR();
+  const from = el('lang-from').value;
+  r.lang = from === 'Swahili' ? 'sw-TZ' : from === 'French' ? 'fr-FR' : 'en-US';
+  r.onresult = e => { el('translate-input').value = e.results[0][0].transcript; };
+  r.onerror = () => showToast('⚠️ Hitilafu ya maikrofoni', 'error');
+  r.start();
+  showToast('🎙️ Sema sasa...');
+}
+function copyTranslation() {
+  const txt = el('translate-output').textContent;
+  if(txt) navigator.clipboard?.writeText(txt).then(() => showToast('✅ Imenakiliwa!', 'success'));
+}
+
+// ── ABOUT ──
+function renderAbout() {
+  if(!currentUser) return;
+  el('about-account-info').innerHTML = `
+    <div style="color:var(--text);margin-bottom:12px;font-family:var(--font-display);font-size:13px;">👤 ${currentUser.fullName}</div>
+    <div style="color:var(--text2);font-family:var(--font-mono);font-size:11px;line-height:2;">
+      <div>📧 Email: ${currentUser.email}</div>
+      ${currentUser.phone ? `<div>📱 Simu: ${currentUser.phone}</div>` : ''}
+      <div>🕐 Alijiunga: ${currentUser.joinedAt}</div>
+    </div>`;
+  // Database info
+  const users = JSON.parse(localStorage.getItem('daxon_users')) || [];
+  const allNotes = JSON.parse(localStorage.getItem('daxon_notes_' + currentUser.id)) || [];
+  const allEvents = JSON.parse(localStorage.getItem('daxon_events_' + currentUser.id)) || [];
+  const allSummaries = JSON.parse(localStorage.getItem('daxon_summaries_' + currentUser.id)) || [];
+  const dbSize = JSON.stringify(localStorage).length;
+  el('db-info').innerHTML = `
+    <div>👥 Watumiaji wote: ${users.length}</div>
+    <div>📝 Notes: ${allNotes.length}</div>
+    <div>📅 Matukio: ${allEvents.length}</div>
+    <div>💡 Summaries: ${allSummaries.length}</div>
+    <div>💾 Ukubwa wa DB: ~${Math.round(dbSize/1024)}KB / 5MB</div>
+    <div style="margin-top:10px;color:var(--cyan);">🔒 Data imehifadhiwa kwenye kivinjari chako (localStorage)</div>`;
+}
+
+// ── SPEECH ──
+function speakText(txt) {
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(txt);
+  utter.rate = 0.9; utter.pitch = 1;
+  window.speechSynthesis.speak(utter);
+}
+
+// ── INIT TRIGGER ──
+if(currentUser) {
+  const introScreen = el('intro-screen');
+  // Still show intro, then show app
+}
+
+// ── PWA: SERVICE WORKER REGISTRATION (offline support / installable app) ──
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+  });
+}
+
+</script>
+</body>
+</html>
