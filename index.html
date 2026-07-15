@@ -13,11 +13,13 @@
 <link rel="icon" href="./icon-192.png" type="image/png"/>
 <link rel="apple-touch-icon" href="./icon-192.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<!-- defer = these load in the background; the app UI renders immediately
+     instead of freezing on a blank screen while waiting for slow/no internet -->
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -1679,8 +1681,4 @@ function splitSentences(text) {
 function tokenize(s) {
   return (s.toLowerCase().match(/[a-zà-ÿ']+/g) || []).filter(w => w.length > 2 && !STOPWORDS.has(w));
 }
-// Extractive summarizer - returns a "quick answer" (1 sentence)
-// and "detailed info" (several key sentences), using no API at all.
-function extractiveSummarize(text, opts) {
-  opts = opts || {};
-  cons
+// Extractive summ
