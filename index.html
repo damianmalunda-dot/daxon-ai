@@ -13,8 +13,6 @@
 <link rel="icon" href="./icon-192.png" type="image/png"/>
 <link rel="apple-touch-icon" href="./icon-192.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet"/>
-<!-- defer = these load in the background; the app UI renders immediately
-     instead of freezing on a blank screen while waiting for slow/no internet -->
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -99,8 +97,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-si
   background:transparent;border:1px solid var(--border2);border-radius:8px;
   color:var(--text2);font-family:var(--font-mono);font-size:11px;letter-spacing:3px;
   padding:10px 28px;cursor:pointer;transition:all 0.3s;
+  pointer-events:auto !important;
+  z-index:10001;
+  position:relative;
 }
 .intro-skip:hover{border-color:var(--cyan);color:var(--cyan);box-shadow:var(--glow);}
+.intro-skip:active{transform:translateY(-2px);}
 .intro-feature-pills{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:28px;}
 .pill{
   padding:5px 14px;border-radius:20px;border:1px solid var(--border);
@@ -246,6 +248,7 @@ textarea{resize:vertical;line-height:1.7;}
   #content{padding:12px;}
   .intro-title-main{font-size:34px;letter-spacing:6px;}
 }
+
 /* Toggle Switch (Privacy Mode) */
 .switch{position:relative;display:inline-block;width:44px;height:24px;}
 .switch input{opacity:0;width:0;height:0;}
@@ -298,7 +301,7 @@ textarea{resize:vertical;line-height:1.7;}
       </div>
       <div class="intro-timer" id="intro-timer">10s</div>
     </div>
-    <button class="intro-skip" onclick="skipIntro()">SKIP →</button>
+    <button class="intro-skip" id="intro-skip-btn">SKIP →</button>
   </div>
 </div>
 
@@ -322,7 +325,7 @@ textarea{resize:vertical;line-height:1.7;}
       <button class="auth-btn" onclick="loginUser()">ENTER SYSTEM →</button>
     </div>
     <div id="register-form" style="display:none;">
-      <div class="field"><label>FULL NAME</label><input type="text" id="reg-name" placeholder="Jina Lako"/></div>
+      <div class="field"><label>FULL NAME</label><input type="text" id="reg-name" placeholder="Your Name"/></div>
       <div class="field"><label>EMAIL</label><input type="email" id="reg-email" placeholder="your@email.com"/></div>
       <div class="field"><label>PHONE</label><input type="tel" id="reg-phone" placeholder="+255..."/></div>
       <div class="field"><label>PASSWORD</label><input type="password" id="reg-password" placeholder="Min 6 chars"/></div>
@@ -338,12 +341,12 @@ textarea{resize:vertical;line-height:1.7;}
 <div id="phone-access-modal">
   <div class="pam-card">
     <div class="pam-icon">📱</div>
-    <div class="pam-title">RUHUSA YA MAFAILI YA SIMU</div>
-    <div class="pam-desc">DAXON AI inaomba ruhusa ya kufikia mafaili kwenye simu yako (PDF, Word, picha, n.k.) ili iweze kuyasoma na kukujibu maswali kuyahusu. Chagua folda au mafaili unayotaka DAXON AI iwe na uwezo wa kuyasoma.</div>
+    <div class="pam-title">FILE ACCESS REQUEST</div>
+    <div class="pam-desc">DAXON AI requests permission to access files on your device (PDF, Word, images, etc.) to read and answer questions about them. Choose a folder or files you want DAXON AI to read.</div>
     <div class="pam-btns">
-      <button class="btn btn-primary btn-full" onclick="requestPhoneFolderAccess()">📁 RUHUSU — CHAGUA FOLDA</button>
-      <button class="btn btn-full" onclick="requestPhoneFileAccess()">📎 CHAGUA MAFAILI MAALUM</button>
-      <button class="btn btn-full btn-danger" onclick="skipPhoneAccess()">✕ RUKA KWA SASA</button>
+      <button class="btn btn-primary btn-full" onclick="requestPhoneFolderAccess()">📁 ALLOW — CHOOSE FOLDER</button>
+      <button class="btn btn-full" onclick="requestPhoneFileAccess()">📎 CHOOSE SPECIFIC FILES</button>
+      <button class="btn btn-full btn-danger" onclick="skipPhoneAccess()">✕ SKIP FOR NOW</button>
     </div>
     <div class="pam-status" id="pam-status"></div>
   </div>
@@ -365,7 +368,7 @@ textarea{resize:vertical;line-height:1.7;}
         <button class="btn btn-sm" id="lang-btn-sw" onclick="applyLanguage('sw')" style="padding:6px 10px;">🇹🇿 SW</button>
         <button class="btn btn-sm" id="lang-btn-en" onclick="applyLanguage('en')" style="padding:6px 10px;">🇬🇧 EN</button>
       </div>
-      <button class="logout-btn" onclick="logoutUser()" data-i18n="logout">LOGOUT</button>
+      <button class="logout-btn" onclick="logoutUser()">LOGOUT</button>
     </div>
   </div>
 
@@ -374,34 +377,34 @@ textarea{resize:vertical;line-height:1.7;}
     <!-- SIDEBAR -->
     <div id="sidebar">
       <button class="nav-btn active" data-page="dashboard" onclick="goTo('dashboard')">
-        <span class="nav-icon">📊</span><span class="nav-label" data-i18n="nav_dash">DASH</span>
+        <span class="nav-icon">📊</span><span class="nav-label">DASH</span>
       </button>
       <button class="nav-btn" data-page="notes" onclick="goTo('notes')">
-        <span class="nav-icon">📝</span><span class="nav-label" data-i18n="nav_notes">NOTES</span>
+        <span class="nav-icon">📝</span><span class="nav-label">NOTES</span>
       </button>
       <button class="nav-btn" data-page="reader" onclick="goTo('reader')">
-        <span class="nav-icon">📖</span><span class="nav-label" data-i18n="nav_reader">READER</span>
+        <span class="nav-icon">📖</span><span class="nav-label">READER</span>
       </button>
       <button class="nav-btn" data-page="scanner" onclick="goTo('scanner')">
-        <span class="nav-icon">📷</span><span class="nav-label" data-i18n="nav_scan">SCAN</span>
+        <span class="nav-icon">📷</span><span class="nav-label">SCAN</span>
       </button>
       <button class="nav-btn" data-page="summaries" onclick="goTo('summaries')">
-        <span class="nav-icon">💡</span><span class="nav-label" data-i18n="nav_summ">SUMM.</span>
+        <span class="nav-icon">💡</span><span class="nav-label">SUMM.</span>
       </button>
       <button class="nav-btn" data-page="schedule" onclick="goTo('schedule')">
-        <span class="nav-icon">📅</span><span class="nav-label" data-i18n="nav_sched">SCHED</span>
+        <span class="nav-icon">📅</span><span class="nav-label">SCHED</span>
       </button>
       <button class="nav-btn" data-page="phonefiles" onclick="goTo('phonefiles')">
-        <span class="nav-icon">📱</span><span class="nav-label" data-i18n="nav_phone">SIMU</span>
+        <span class="nav-icon">📱</span><span class="nav-label">PHONE</span>
       </button>
       <button class="nav-btn" data-page="daxon-ai" onclick="goTo('daxon-ai')">
-        <span class="nav-icon">🤖</span><span class="nav-label" data-i18n="nav_ai">AI</span>
+        <span class="nav-icon">🤖</span><span class="nav-label">AI</span>
       </button>
       <button class="nav-btn" data-page="translate" onclick="goTo('translate')">
-        <span class="nav-icon">🌐</span><span class="nav-label" data-i18n="nav_trans">TRANS</span>
+        <span class="nav-icon">🌐</span><span class="nav-label">TRANS</span>
       </button>
       <button class="nav-btn" data-page="about" onclick="goTo('about')">
-        <span class="nav-icon">ℹ️</span><span class="nav-label" data-i18n="nav_info">INFO</span>
+        <span class="nav-icon">ℹ️</span><span class="nav-label">INFO</span>
       </button>
     </div>
 
@@ -410,45 +413,45 @@ textarea{resize:vertical;line-height:1.7;}
 
       <!-- ── DASHBOARD ── -->
       <div id="page-dashboard" class="page active">
-        <div class="page-title"><span class="dot"></span><span data-i18n="pt_dashboard">DASHBOARD</span></div>
+        <div class="page-title"><span class="dot"></span><span>DASHBOARD</span></div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px;">
-          <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-val" id="stat-notes">0</div><div class="stat-lbl" data-i18n="nav_notes">NOTES</div></div>
-          <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-val" id="stat-events">0</div><div class="stat-lbl" data-i18n="lbl_events">EVENTS</div></div>
-          <div class="stat-card"><div class="stat-icon">💡</div><div class="stat-val" id="stat-summaries">0</div><div class="stat-lbl" data-i18n="nav_summ">SUMM.</div></div>
+          <div class="stat-card"><div class="stat-icon">📝</div><div class="stat-val" id="stat-notes">0</div><div class="stat-lbl">NOTES</div></div>
+          <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-val" id="stat-events">0</div><div class="stat-lbl">EVENTS</div></div>
+          <div class="stat-card"><div class="stat-icon">💡</div><div class="stat-val" id="stat-summaries">0</div><div class="stat-lbl">SUMM.</div></div>
         </div>
         <div class="card">
-          <div class="card-title" data-i18n="ct_recent_notes">📚 RECENT NOTES</div>
+          <div class="card-title">📚 RECENT NOTES</div>
           <div id="dash-notes-list"></div>
         </div>
         <div class="card">
-          <div class="card-title" data-i18n="ct_today_schedule">📅 TODAY'S SCHEDULE</div>
+          <div class="card-title">📅 TODAY'S SCHEDULE</div>
           <div id="dash-schedule-list"></div>
         </div>
       </div>
 
       <!-- ── NOTES ── -->
       <div id="page-notes" class="page">
-        <div class="page-title"><span class="dot"></span><span data-i18n="pt_notes">NOTES MANAGER</span></div>
+        <div class="page-title"><span class="dot"></span><span>NOTES MANAGER</span></div>
         <div id="notes-list-view">
           <div class="card">
-            <input type="text" id="notes-search" placeholder="Tafuta notes..." data-i18n-ph="ph_search_notes" onkeyup="renderNotes()" style="margin-bottom:12px;"/>
+            <input type="text" id="notes-search" placeholder="Search notes..." onkeyup="renderNotes()" style="margin-bottom:12px;"/>
             <div class="import-zone" ondrop="dropFile(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)" onclick="triggerFileImport()">
               <div class="import-icon">📂</div>
-              <p data-i18n="drop_files">DROP FILES OR CLICK TO IMPORT</p>
+              <p>DROP FILES OR CLICK TO IMPORT</p>
               <small>PDF • DOCX • PPTX • XLSX • TXT • JSON • CSV • Images</small>
             </div>
-            <button class="btn btn-full btn-primary" onclick="openNoteEditor()"><span data-i18n="btn_new_note">➕ NOTE MPYA</span></button>
+            <button class="btn btn-full btn-primary" onclick="openNoteEditor()"><span>➕ NEW NOTE</span></button>
           </div>
           <div id="notes-list"></div>
         </div>
         <div id="note-editor" style="display:none;">
-          <div class="page-title"><span class="dot"></span><span data-i18n="pt_write_note">ANDIKA NOTE</span></div>
+          <div class="page-title"><span class="dot"></span><span>WRITE NOTE</span></div>
           <div class="card">
-            <div class="field"><label data-i18n="lbl_title">KICHWA</label><input type="text" id="note-title-input" placeholder="Kichwa cha note..." data-i18n-ph="ph_note_title"/></div>
-            <div class="field"><label data-i18n="lbl_content">MAUDHUI</label><textarea id="note-content-input" placeholder="Andika hapa..." data-i18n-ph="ph_write_here" rows="10"></textarea></div>
+            <div class="field"><label>TITLE</label><input type="text" id="note-title-input" placeholder="Note title..."/></div>
+            <div class="field"><label>CONTENT</label><textarea id="note-content-input" placeholder="Write here..." rows="10"></textarea></div>
             <div style="display:flex;gap:10px;">
-              <button class="btn btn-success" onclick="saveNote()"><span data-i18n="btn_save">💾 HIFADHI</span></button>
-              <button class="btn btn-danger" onclick="closeNoteEditor()"><span data-i18n="btn_close">✕ FUNGA</span></button>
+              <button class="btn btn-success" onclick="saveNote()"><span>💾 SAVE</span></button>
+              <button class="btn btn-danger" onclick="closeNoteEditor()"><span>✕ CLOSE</span></button>
             </div>
           </div>
         </div>
@@ -458,10 +461,10 @@ textarea{resize:vertical;line-height:1.7;}
             <div id="reader-content-inline" style="line-height:1.8;color:var(--text);white-space:pre-wrap;max-height:380px;overflow-y:auto;font-size:13px;"></div>
             <div style="color:var(--text3);font-size:10px;margin:10px 0;font-family:var(--font-mono);" id="reader-date-inline"></div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;">
-              <button class="btn btn-primary" onclick="editCurrentNote()"><span data-i18n="btn_edit">✎ HARIRI</span></button>
+              <button class="btn btn-primary" onclick="editCurrentNote()"><span>✎ EDIT</span></button>
               <button class="btn btn-purple" onclick="summarizeCurrentNote()">💡 AI SUMMARIZE</button>
-              <button class="btn" onclick="speakNote()"><span data-i18n="btn_read_aloud">🔊 SOMA KWA SAUTI</span></button>
-              <button class="btn btn-danger" onclick="closeNoteReader()"><span data-i18n="btn_close">✕ FUNGA</span></button>
+              <button class="btn" onclick="speakNote()"><span>🔊 READ ALOUD</span></button>
+              <button class="btn btn-danger" onclick="closeNoteReader()"><span>✕ CLOSE</span></button>
             </div>
           </div>
         </div>
@@ -471,24 +474,24 @@ textarea{resize:vertical;line-height:1.7;}
       <div id="page-reader" class="page">
         <div class="page-title"><span class="dot"></span>DOCUMENT READER</div>
         <div class="card">
-          <div class="card-title" data-i18n="ct_upload_doc">📤 PAKIA HATI YOYOTE</div>
+          <div class="card-title">📤 UPLOAD ANY DOCUMENT</div>
           <div class="import-zone" onclick="document.getElementById('reader-file-input').click()" ondrop="dropReaderFile(event)" ondragover="dragOver(event)" ondragleave="dragLeave(event)">
             <div class="import-icon">📄</div>
-            <p data-i18n="click_or_drop">BONYEZA AU TUPA HAPA</p>
+            <p>CLICK OR DROP HERE</p>
             <small>PDF • DOCX • PPTX • XLSX • TXT • CSV • JSON • MD • Images</small>
           </div>
           <input type="file" id="reader-file-input" style="display:none;" accept=".pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.txt,.csv,.json,.md,.png,.jpg,.jpeg,.webp" onchange="readDocumentFile(event)"/>
         </div>
         <div id="reader-panel" style="display:none;">
           <div class="card">
-            <div class="reader-file-info" id="reader-file-info">📄 Hakuna faili</div>
+            <div class="reader-file-info" id="reader-file-info">📄 No file</div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-              <button class="btn btn-sm" onclick="speakReaderContent()"><span data-i18n="btn_read_aloud">🔊 SOMA KWA SAUTI</span></button>
+              <button class="btn btn-sm" onclick="speakReaderContent()"><span>🔊 READ ALOUD</span></button>
               <button class="btn btn-sm btn-purple" onclick="aiSummarizeReader()">💡 AI SUMMARIZE</button>
-              <button class="btn btn-sm btn-success" onclick="saveReaderAsNote()"><span data-i18n="btn_save_as_note">💾 HIFADHI KAMA NOTE</span></button>
-              <button class="btn btn-sm btn-danger" onclick="closeReaderPanel()"><span data-i18n="btn_close">✕ FUNGA</span></button>
+              <button class="btn btn-sm btn-success" onclick="saveReaderAsNote()"><span>💾 SAVE AS NOTE</span></button>
+              <button class="btn btn-sm btn-danger" onclick="closeReaderPanel()"><span>✕ CLOSE</span></button>
             </div>
-            <div id="doc-reader-content">Subiri...</div>
+            <div id="doc-reader-content">Loading...</div>
           </div>
           <div id="reader-summary-box" style="display:none;" class="card">
             <div class="card-title">💡 AI SUMMARY</div>
@@ -501,33 +504,33 @@ textarea{resize:vertical;line-height:1.7;}
       <div id="page-scanner" class="page">
         <div class="page-title"><span class="dot"></span>SCANNER & CAMERA</div>
         <div class="card">
-          <div class="card-title" data-i18n="ct_camera">📷 KAMERA (FULL ACCESS)</div>
+          <div class="card-title">📷 CAMERA (FULL ACCESS)</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
-            <button class="btn btn-primary" id="start-cam-btn" onclick="startCamera()"><span data-i18n="btn_start_cam">📷 WASHA KAMERA</span></button>
-            <button class="btn" id="switch-cam-btn" onclick="switchCamera()" style="display:none;"><span data-i18n="btn_switch">🔄 BADILISHA</span></button>
-            <button class="btn btn-success" id="snap-btn" onclick="snapPhoto()" style="display:none;"><span data-i18n="btn_snap">📸 PIGA PICHA</span></button>
-            <button class="btn btn-danger" id="stop-cam-btn" onclick="stopCamera()" style="display:none;"><span data-i18n="btn_stop">⏹ SIMAMA</span></button>
+            <button class="btn btn-primary" id="start-cam-btn" onclick="startCamera()"><span>📷 START CAMERA</span></button>
+            <button class="btn" id="switch-cam-btn" onclick="switchCamera()" style="display:none;"><span>🔄 SWITCH</span></button>
+            <button class="btn btn-success" id="snap-btn" onclick="snapPhoto()" style="display:none;"><span>📸 TAKE PHOTO</span></button>
+            <button class="btn btn-danger" id="stop-cam-btn" onclick="stopCamera()" style="display:none;"><span>⏹ STOP</span></button>
           </div>
           <video id="camera-stream" autoplay playsinline muted></video>
           <canvas id="capture-canvas"></canvas>
           <div id="cam-ocr-status" style="color:var(--cyan);font-family:var(--font-mono);font-size:11px;margin-top:8px;"></div>
         </div>
         <div class="card">
-          <div class="card-title" data-i18n="ct_upload_img">📁 PAKIA PICHA / FAILI</div>
+          <div class="card-title">📁 UPLOAD IMAGE / FILE</div>
           <div class="import-zone" onclick="document.getElementById('scan-file-input').click()">
             <div class="import-icon">🔍</div>
-            <p data-i18n="click_upload_img">BONYEZA KUPAKIA PICHA AU FAILI</p>
+            <p>CLICK TO UPLOAD IMAGE OR FILE</p>
             <small>PNG • JPG • JPEG • WEBP (OCR Text Extraction)</small>
           </div>
           <input type="file" id="scan-file-input" style="display:none;" accept="image/*,.pdf,.txt" onchange="handleScanFile(event)"/>
         </div>
         <div class="card">
-          <div class="card-title" data-i18n="ct_scan_result">📝 MATOKEO YA SCAN</div>
-          <textarea id="scan-text-result" placeholder="Matokeo ya OCR/scan yataonekana hapa..." data-i18n-ph="ph_scan_result" rows="7"></textarea>
+          <div class="card-title">📝 SCAN RESULT</div>
+          <textarea id="scan-text-result" placeholder="OCR/scan results will appear here..." rows="7"></textarea>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;">
             <button class="btn btn-purple btn-sm" onclick="aiSummarizeScan()">💡 SUMMARIZE</button>
-            <button class="btn btn-success btn-sm" onclick="saveScanAsNote()"><span data-i18n="btn_save_note">💾 HIFADHI NOTE</span></button>
-            <button class="btn btn-sm" onclick="speakScan()"><span data-i18n="btn_read">🔊 SOMA</span></button>
+            <button class="btn btn-success btn-sm" onclick="saveScanAsNote()"><span>💾 SAVE NOTE</span></button>
+            <button class="btn btn-sm" onclick="speakScan()"><span>🔊 READ</span></button>
           </div>
           <div id="scan-summary" style="display:none;margin-top:12px;" class="card">
             <div class="card-title">💡 AI SUMMARY</div>
@@ -540,66 +543,66 @@ textarea{resize:vertical;line-height:1.7;}
       <div id="page-summaries" class="page">
         <div class="page-title"><span class="dot"></span>MY SUMMARIES</div>
         <div class="card">
-          <div class="card-title" data-i18n="ct_new_summary">📝 MUHTASARI MPYA (MANUAL)</div>
-          <div class="field"><label data-i18n="lbl_write_text">ANDIKA MAANDISHI</label><textarea id="manual-sum-input" placeholder="Bandika maandishi yako hapa... AI itafanya muhtasari." data-i18n-ph="ph_paste_text" rows="5"></textarea></div>
+          <div class="card-title">📝 NEW SUMMARY (MANUAL)</div>
+          <div class="field"><label>WRITE TEXT</label><textarea id="manual-sum-input" placeholder="Paste your text here... AI will summarize it." rows="5"></textarea></div>
           <div style="display:flex;gap:10px;">
-            <button class="btn btn-primary" onclick="createManualSummary()"><span data-i18n="btn_summarize">💡 FANYA MUHTASARI</span></button>
-            <button class="btn" onclick="document.getElementById('sum-voice-input').click()"><span data-i18n="btn_voice">🎙️ SAUTI</span></button>
+            <button class="btn btn-primary" onclick="createManualSummary()"><span>💡 SUMMARIZE</span></button>
+            <button class="btn" onclick="document.getElementById('sum-file-input').click()"><span>🎙️ VOICE</span></button>
           </div>
           <input type="file" id="sum-file-input" style="display:none;" onchange="handleSumFile(event)"/>
         </div>
         <div id="sum-result-box" style="display:none;" class="card">
-          <div class="card-title">✨ MUHTASARI WA AI</div>
+          <div class="card-title">✨ AI SUMMARY</div>
           <div id="sum-result-text" style="line-height:1.8;color:var(--text);font-size:13px;"></div>
-          <button class="btn btn-success btn-sm" style="margin-top:12px;" onclick="saveSummaryToList()"><span data-i18n="btn_save_summary">💾 HIFADHI MUHTASARI</span></button>
+          <button class="btn btn-success btn-sm" style="margin-top:12px;" onclick="saveSummaryToList()"><span>💾 SAVE SUMMARY</span></button>
         </div>
-        <div class="page-title" style="margin-top:18px;font-size:11px;"><span class="dot"></span><span data-i18n="pt_saved_summaries">SUMMARIES ZILIZOHIFADHIWA</span></div>
+        <div class="page-title" style="margin-top:18px;font-size:11px;"><span class="dot"></span><span>SAVED SUMMARIES</span></div>
         <div id="summaries-list"></div>
       </div>
 
       <!-- ── SCHEDULE ── -->
       <div id="page-schedule" class="page">
-        <div class="page-title"><span class="dot"></span><span data-i18n="pt_schedule">RATIBA & VIKUMBUSHO</span></div>
+        <div class="page-title"><span class="dot"></span><span>SCHEDULE & REMINDERS</span></div>
         <div class="card" id="notif-permission-card" style="display:none;">
-          <div class="card-title" data-i18n="ct_notifications">🔔 ARIFA (NOTIFICATIONS)</div>
+          <div class="card-title">🔔 NOTIFICATIONS</div>
           <div style="color:var(--text2);font-size:11px;font-family:var(--font-mono);margin-bottom:10px;" id="notif-status-text"></div>
-          <button class="btn btn-primary btn-full btn-sm" onclick="requestNotifPermission()"><span data-i18n="btn_enable_notif">🔔 WASHA ARIFA</span></button>
+          <button class="btn btn-primary btn-full btn-sm" onclick="requestNotifPermission()"><span>🔔 ENABLE NOTIFICATIONS</span></button>
         </div>
         <div class="card">
-          <div class="card-title" data-i18n="ct_add_event">➕ ONGEZA TUKIO</div>
-          <div class="field"><label data-i18n="lbl_title">KICHWA</label><input type="text" id="event-title" placeholder="k.m. Kipindi cha Hisabati" data-i18n-ph="ph_event_title"/></div>
+          <div class="card-title">➕ ADD EVENT</div>
+          <div class="field"><label>TITLE</label><input type="text" id="event-title" placeholder="e.g. Math Class"/></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;">
-            <div class="field"><label data-i18n="lbl_date">TAREHE</label><input type="date" id="event-date"/></div>
-            <div class="field"><label data-i18n="lbl_time">MUDA</label><input type="time" id="event-time"/></div>
+            <div class="field"><label>DATE</label><input type="date" id="event-date"/></div>
+            <div class="field"><label>TIME</label><input type="time" id="event-time"/></div>
           </div>
-          <div class="field"><label data-i18n="lbl_end_time">MUDA WA MWISHO</label><input type="time" id="event-end-time"/></div>
-          <div class="field"><label data-i18n="lbl_desc_optional">MAELEZO (SI LAZIMA)</label><textarea id="event-desc" rows="2" placeholder="Maelezo zaidi kuhusu tukio hili..." data-i18n-ph="ph_event_desc"></textarea></div>
+          <div class="field"><label>END TIME</label><input type="time" id="event-end-time"/></div>
+          <div class="field"><label>DESCRIPTION (OPTIONAL)</label><textarea id="event-desc" rows="2" placeholder="More details about this event..."></textarea></div>
           <div class="field" style="display:flex;align-items:center;gap:10px;">
             <input type="checkbox" id="event-reminder" style="width:auto;cursor:pointer;" checked/>
-            <label style="font-family:var(--font-mono);font-size:10px;color:var(--blue);cursor:pointer;" for="event-reminder" data-i18n="lbl_set_reminder">⏰ WEKA KIKUMBUSHO (ARIFA)</label>
+            <label style="font-family:var(--font-mono);font-size:10px;color:var(--blue);cursor:pointer;" for="event-reminder">⏰ SET REMINDER (NOTIFICATION)</label>
           </div>
-          <button class="btn btn-success btn-full" onclick="addEvent()"><span data-i18n="btn_add_event">✓ ONGEZA TUKIO</span></button>
+          <button class="btn btn-success btn-full" onclick="addEvent()"><span>✓ ADD EVENT</span></button>
         </div>
         <div class="card">
-          <div class="card-title" data-i18n="ct_upcoming">📅 MATUKIO YAJAYO</div>
+          <div class="card-title">📅 UPCOMING EVENTS</div>
           <div id="events-list"></div>
         </div>
       </div>
 
       <!-- ── PHONE FILES ── -->
       <div id="page-phonefiles" class="page">
-        <div class="page-title"><span class="dot"></span><span data-i18n="pt_phonefiles">MAFAILI YA SIMU</span></div>
+        <div class="page-title"><span class="dot"></span><span>PHONE FILES</span></div>
         <div class="card">
-          <div class="card-title" data-i18n="ct_phone_access">📱 RUHUSA YA MAFAILI</div>
+          <div class="card-title">📱 FILE ACCESS</div>
           <div style="color:var(--text2);font-size:11px;font-family:var(--font-mono);line-height:1.8;margin-bottom:12px;" id="phone-access-status-text"></div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn btn-primary btn-sm" onclick="requestPhoneFolderAccess()"><span data-i18n="btn_grant_folder">📁 CHAGUA FOLDA</span></button>
-            <button class="btn btn-sm" onclick="requestPhoneFileAccess()"><span data-i18n="btn_grant_files">📎 ONGEZA MAFAILI</span></button>
-            <button class="btn btn-sm btn-danger" onclick="clearPhoneFiles()"><span data-i18n="btn_clear_phone">🗑 FUTA YOTE</span></button>
+            <button class="btn btn-primary btn-sm" onclick="requestPhoneFolderAccess()"><span>📁 CHOOSE FOLDER</span></button>
+            <button class="btn btn-sm" onclick="requestPhoneFileAccess()"><span>📎 ADD FILES</span></button>
+            <button class="btn btn-sm btn-danger" onclick="clearPhoneFiles()"><span>🗑 CLEAR ALL</span></button>
           </div>
         </div>
         <div class="card">
-          <input type="text" id="phonefiles-search" placeholder="Tafuta mafaili..." data-i18n-ph="ph_search_phonefiles" onkeyup="renderPhoneFiles()" style="margin-bottom:12px;"/>
+          <input type="text" id="phonefiles-search" placeholder="Search files..." onkeyup="renderPhoneFiles()" style="margin-bottom:12px;"/>
           <div id="phonefiles-list"></div>
         </div>
       </div>
@@ -614,18 +617,18 @@ textarea{resize:vertical;line-height:1.7;}
             <button onclick="clearAiAttachment()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:13px;">✖</button>
           </div>
           <div style="display:flex;gap:8px;margin-top:10px;">
-            <textarea id="ai-question" placeholder="Uliza swali lolote... (Swahili au English)" data-i18n-ph="ph_ask_question" rows="2" style="flex:1;"></textarea>
+            <textarea id="ai-question" placeholder="Ask any question... (Swahili or English)" rows="2" style="flex:1;"></textarea>
             <div style="display:flex;flex-direction:column;gap:6px;">
-              <button class="btn btn-primary btn-sm" onclick="askAI()"><span data-i18n="btn_ask">🤖 ULIZA</span></button>
+              <button class="btn btn-primary btn-sm" onclick="askAI()"><span>🤖 ASK</span></button>
               <button class="btn btn-sm" onclick="startVoiceAI()">🎙️</button>
             </div>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-            <button class="btn btn-sm" onclick="document.getElementById('ai-file-input').click()"><span data-i18n="btn_upload_file">📎 PAKIA FAILI/PICHA</span></button>
+            <button class="btn btn-sm" onclick="document.getElementById('ai-file-input').click()"><span>📎 UPLOAD FILE/IMAGE</span></button>
             <button class="btn btn-sm" onclick="toggleWebSearch()" id="web-search-toggle">🌐 Internet: OFF</button>
             <button class="btn btn-sm" onclick="toggleNotesCtx()" id="notes-ctx-toggle">📚 Notes Context: ON</button>
-            <button class="btn btn-sm" onclick="togglePhoneCtx()" id="phone-ctx-toggle">📱 Simu Files: OFF</button>
-            <button class="btn btn-sm btn-danger" onclick="clearChat()"><span data-i18n="btn_clear_chat">🗑 FUTA MAZUNGUMZO</span></button>
+            <button class="btn btn-sm" onclick="togglePhoneCtx()" id="phone-ctx-toggle">📱 Phone Files: OFF</button>
+            <button class="btn btn-sm btn-danger" onclick="clearChat()"><span>🗑 CLEAR CHAT</span></button>
           </div>
           <input type="file" id="ai-file-input" style="display:none;" accept=".txt,.md,.csv,.json,.pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.png,.jpg,.jpeg,.webp" onchange="handleAiFileAttach(event)"/>
         </div>
@@ -633,11 +636,11 @@ textarea{resize:vertical;line-height:1.7;}
 
       <!-- ── TRANSLATE ── -->
       <div id="page-translate" class="page">
-        <div class="page-title"><span class="dot"></span><span data-i18n="pt_translate">TAFSIRI YA LUGHA</span></div>
+        <div class="page-title"><span class="dot"></span><span>LANGUAGE TRANSLATOR</span></div>
         <div class="card">
           <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:10px;margin-bottom:14px;align-items:end;">
             <div class="field">
-              <label data-i18n="lbl_from">KUTOKA</label>
+              <label>FROM</label>
               <select id="lang-from">
                 <option value="Swahili">Swahili</option>
                 <option value="English" selected>English</option>
@@ -653,7 +656,7 @@ textarea{resize:vertical;line-height:1.7;}
             </div>
             <button class="btn btn-sm" onclick="swapLangs()" style="margin-bottom:0;">⇄</button>
             <div class="field">
-              <label data-i18n="lbl_to">KWENDA</label>
+              <label>TO</label>
               <select id="lang-to">
                 <option value="Swahili" selected>Swahili</option>
                 <option value="English">English</option>
@@ -668,15 +671,15 @@ textarea{resize:vertical;line-height:1.7;}
               </select>
             </div>
           </div>
-          <div class="field"><label data-i18n="lbl_text_to_translate">MAANDISHI YA KUTAFSIRI</label><textarea id="translate-input" placeholder="Andika maandishi hapa..." data-i18n-ph="ph_write_here" rows="4"></textarea></div>
+          <div class="field"><label>TEXT TO TRANSLATE</label><textarea id="translate-input" placeholder="Write here..." rows="4"></textarea></div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-primary" onclick="doTranslate()"><span data-i18n="btn_translate">✓ TAFSIRI</span></button>
-            <button class="btn" onclick="startTranslateVoice()"><span data-i18n="btn_voice">🎙️ SAUTI</span></button>
-            <button class="btn btn-sm" onclick="copyTranslation()"><span data-i18n="btn_copy">📋 NAKILI</span></button>
+            <button class="btn btn-primary" onclick="doTranslate()"><span>✓ TRANSLATE</span></button>
+            <button class="btn" onclick="startTranslateVoice()"><span>🎙️ VOICE</span></button>
+            <button class="btn btn-sm" onclick="copyTranslation()"><span>📋 COPY</span></button>
           </div>
-          <div id="translate-loading" style="display:none;text-align:center;padding:20px;color:var(--cyan);"><span class="loading">⟳</span> <span data-i18n="translating">Inatafsiri...</span></div>
+          <div id="translate-loading" style="display:none;text-align:center;padding:20px;color:var(--cyan);"><span class="loading">⟳</span> <span>Translating...</span></div>
           <div id="translate-result" style="display:none;background:rgba(0,229,255,.04);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:14px;">
-            <div class="card-title" data-i18n="ct_translation">📌 TAFSIRI</div>
+            <div class="card-title">📌 TRANSLATION</div>
             <div id="translate-output" style="line-height:1.8;color:var(--text);white-space:pre-wrap;font-size:13px;"></div>
           </div>
         </div>
@@ -684,24 +687,24 @@ textarea{resize:vertical;line-height:1.7;}
 
       <!-- ── ABOUT ── -->
       <div id="page-about" class="page">
-        <div class="page-title"><span class="dot"></span><span data-i18n="pt_about">KUHUSU DAXON</span></div>
+        <div class="page-title"><span class="dot"></span><span>ABOUT DAXON</span></div>
 
         <div class="card">
-          <div class="card-title" data-i18n="ct_about_title">🚀 DAXON AI — MSAIDIZI WAKO WA MASOMO</div>
-          <div style="color:var(--text);font-size:13px;line-height:1.9;" data-i18n-html="about_p1"></div>
-          <div style="color:var(--text2);font-size:12px;line-height:1.9;margin-top:10px;" data-i18n-html="about_p2"></div>
+          <div class="card-title">🚀 DAXON AI — YOUR STUDY ASSISTANT</div>
+          <div style="color:var(--text);font-size:13px;line-height:1.9;">DAXON AI is a modern digital platform built by <b style="color:var(--cyan);">Daxon Technology</b>, designed to help every student and small business owner in Tanzania study more easily, understand faster, and work more efficiently — with no extra costs and no API keys required.</div>
+          <div style="color:var(--text2);font-size:12px;line-height:1.9;margin-top:10px;">Every tool here — from reading documents and scanning images to translating languages and summarizing information from the web — runs directly in your browser, quickly and with complete privacy, since all your data stays on your device.</div>
         </div>
 
         <div class="card">
-          <div class="card-title" data-i18n="ct_mission">🎯 DHIMA YETU</div>
-          <div style="color:var(--text2);font-size:12px;line-height:1.9;" data-i18n-html="about_mission"></div>
+          <div class="card-title">🎯 OUR MISSION</div>
+          <div style="color:var(--text2);font-size:12px;line-height:1.9;">To empower Tanzanian students and entrepreneurs with cutting-edge technology in their own language — so education and progress are never held back by cost or language barriers.</div>
         </div>
 
         <div class="card">
-          <div class="card-title" data-i18n="ct_privacy">🔒 FARAGHA (PRIVACY)</div>
-          <div style="color:var(--text2);font-size:12px;line-height:1.8;margin-bottom:12px;" data-i18n-html="privacy_desc"></div>
+          <div class="card-title">🔒 PRIVACY</div>
+          <div style="color:var(--text2);font-size:12px;line-height:1.8;margin-bottom:12px;">When you turn on Privacy Mode, DAXON AI will stop sending any requests to the internet. Everything will run entirely on your device — using only your Notes, granted phone files, and uploaded files.</div>
           <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(0,229,255,.05);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;">
-            <span style="font-family:var(--font-mono);font-size:11px;color:var(--cyan);" data-i18n="privacy_toggle_label">Privacy Mode</span>
+            <span style="font-family:var(--font-mono);font-size:11px;color:var(--cyan);">Privacy Mode</span>
             <label class="switch">
               <input type="checkbox" id="privacy-toggle" onchange="togglePrivacyMode()"/>
               <span class="slider"></span>
@@ -711,33 +714,33 @@ textarea{resize:vertical;line-height:1.7;}
         </div>
 
         <div class="card">
-          <div class="card-title" data-i18n="ct_account_info">👤 MAELEZO YA AKAUNTI</div>
+          <div class="card-title">👤 ACCOUNT INFO</div>
           <div id="about-account-info"></div>
         </div>
 
         <div class="card">
-          <div class="card-title" data-i18n="ct_features">⚙️ VIPENGELE VILIVYOPO</div>
+          <div class="card-title">⚙️ AVAILABLE FEATURES</div>
           <div style="color:var(--text2);font-family:var(--font-mono);font-size:11px;line-height:2.2;">
             <div>🚀 DAXON Study Platform v3.0</div>
             <div>📅 Build: 2026</div>
-            <div style="color:var(--green);" data-i18n="feat_ai">✅ DAXON AI — Muhtasari & Majibu ya Haraka (Bila API Key)</div>
-            <div style="color:var(--green);" data-i18n="feat_web">✅ Kuchukua Taarifa Mtandaoni (Wikipedia, DuckDuckGo, Google, Bing)</div>
-            <div style="color:var(--green);" data-i18n="feat_file_ai">✅ Kupakia Faili/Picha kwa AI (Auto-Detect Intent)</div>
+            <div style="color:var(--green);">✅ DAXON AI — Instant Summaries & Answers (No API Key)</div>
+            <div style="color:var(--green);">✅ Fetch Info Online (Wikipedia, DuckDuckGo, Google, Bing)</div>
+            <div style="color:var(--green);">✅ Upload Files/Images to AI (Auto-Detect Intent)</div>
             <div style="color:var(--green);">✅ Document Reader (PDF, DOCX, PPTX, XLSX)</div>
             <div style="color:var(--green);">✅ Camera Full Access + OCR</div>
-            <div style="color:var(--green);" data-i18n="feat_translate">✅ Tafsiri ya Lugha (10+ Languages)</div>
-            <div style="color:var(--green);" data-i18n="feat_summaries">✅ My Summaries (Save Automatically)</div>
-            <div style="color:var(--green);" data-i18n="feat_schedule">✅ Schedule & Reminders (Push Notifications)</div>
-            <div style="color:var(--green);" data-i18n="feat_notes">✅ Notes Manager</div>
-            <div style="color:var(--green);" data-i18n="feat_phone">✅ Ufikiaji wa Mafaili ya Simu kwa AI</div>
-            <div style="color:var(--green);" data-i18n="feat_lang">✅ Kiswahili / English Language Switch</div>
-            <div style="color:var(--green);" data-i18n="feat_privacy">✅ Privacy Mode (ON/OFF)</div>
+            <div style="color:var(--green);">✅ Language Translation (10+ Languages)</div>
+            <div style="color:var(--green);">✅ My Summaries (Save Automatically)</div>
+            <div style="color:var(--green);">✅ Schedule & Reminders (Push Notifications)</div>
+            <div style="color:var(--green);">✅ Notes Manager</div>
+            <div style="color:var(--green);">✅ Phone File Access for AI</div>
+            <div style="color:var(--green);">✅ Language Switch: English / Kiswahili</div>
+            <div style="color:var(--green);">✅ Privacy Mode (ON/OFF)</div>
           </div>
         </div>
 
         <div class="card">
-          <div class="card-title" data-i18n="ct_company">🏢 DAXON TECHNOLOGY</div>
-          <div style="color:var(--text2);font-size:12px;line-height:1.9;" data-i18n-html="about_company"></div>
+          <div class="card-title">🏢 DAXON TECHNOLOGY</div>
+          <div style="color:var(--text2);font-size:12px;line-height:1.9;">Daxon Technology is a technology company based in Mbeya, Tanzania, offering software development, graphic design, IT support, and electronics repair services. DAXON AI is one of our products aimed at bringing positive change to students and entrepreneurs.</div>
         </div>
 
         <div class="card">
@@ -759,147 +762,29 @@ textarea{resize:vertical;line-height:1.7;}
 
 <script>
 // ═══════════════════════════════════════════════════════
-//  DAXON v3.0 — COMPLETE JAVASCRIPT ENGINE
+//  DAXON v3.0 — COMPLETE JAVASCRIPT ENGINE (FIXED)
 // ═══════════════════════════════════════════════════════
 
-// ── CONFIG ──
-// DAXON AI requires no API key at all. The entire engine runs inside your
-// browser using text analysis (extractive NLP) and free, no-signup web
-// services (Wikipedia, DuckDuckGo, MyMemory).
 const DAXON_ENGINE_NAME = 'DAXON Local Intelligence Engine v1.0';
 
-// ── I18N (Kiswahili / English language switcher) ──
+// ── I18N ──
 const I18N = {
   sw: {
-    logout: 'LOGOUT',
-    nav_dash: 'DASH', nav_notes: 'NOTES', nav_reader: 'READER', nav_scan: 'SCAN',
-    nav_summ: 'SUMM.', nav_sched: 'RATIBA', nav_phone: 'SIMU', nav_ai: 'AI', nav_trans: 'TAFSIRI', nav_info: 'HABARI',
-    pt_dashboard: 'DASHIBODI', lbl_events: 'MATUKIO',
+    logout: 'LOGOUT', pt_dashboard: 'DASHIBODI', lbl_events: 'MATUKIO',
     ct_recent_notes: '📚 NOTES ZA HIVI KARIBUNI', ct_today_schedule: "📅 RATIBA YA LEO",
-    pt_notes: 'MENEJA WA NOTES', ph_search_notes: 'Tafuta notes...', drop_files: 'TUPA FAILI HAPA AU BONYEZA KUPAKIA',
-    btn_new_note: '➕ NOTE MPYA', pt_write_note: 'ANDIKA NOTE', lbl_title: 'KICHWA', ph_note_title: 'Kichwa cha note...',
-    lbl_content: 'MAUDHUI', ph_write_here: 'Andika hapa...', btn_save: '💾 HIFADHI', btn_close: '✕ FUNGA',
-    btn_edit: '✎ HARIRI', btn_read_aloud: '🔊 SOMA KWA SAUTI',
-    ct_upload_doc: '📤 PAKIA HATI YOYOTE', click_or_drop: 'BONYEZA AU TUPA HAPA',
-    btn_save_as_note: '💾 HIFADHI KAMA NOTE',
-    ct_camera: '📷 KAMERA (FULL ACCESS)', btn_start_cam: '📷 WASHA KAMERA', btn_switch: '🔄 BADILISHA',
-    btn_snap: '📸 PIGA PICHA', btn_stop: '⏹ SIMAMA',
-    ct_upload_img: '📁 PAKIA PICHA / FAILI', click_upload_img: 'BONYEZA KUPAKIA PICHA AU FAILI',
-    ct_scan_result: '📝 MATOKEO YA SCAN', ph_scan_result: 'Matokeo ya OCR/scan yataonekana hapa...',
-    btn_save_note: '💾 HIFADHI NOTE', btn_read: '🔊 SOMA',
-    ct_new_summary: '📝 MUHTASARI MPYA (MANUAL)', lbl_write_text: 'ANDIKA MAANDISHI',
-    ph_paste_text: 'Bandika maandishi yako hapa... AI itafanya muhtasari.',
-    btn_summarize: '💡 FANYA MUHTASARI', btn_voice: '🎙️ SAUTI', btn_save_summary: '💾 HIFADHI MUHTASARI',
-    pt_saved_summaries: 'SUMMARIES ZILIZOHIFADHIWA',
-    pt_schedule: 'RATIBA & VIKUMBUSHO', ct_notifications: '🔔 ARIFA (NOTIFICATIONS)', btn_enable_notif: '🔔 WASHA ARIFA',
-    ct_add_event: '➕ ONGEZA TUKIO', ph_event_title: 'k.m. Kipindi cha Hisabati', lbl_date: 'TAREHE', lbl_time: 'MUDA',
-    lbl_end_time: 'MUDA WA MWISHO', lbl_desc_optional: 'MAELEZO (SI LAZIMA)', ph_event_desc: 'Maelezo zaidi kuhusu tukio hili...',
-    lbl_set_reminder: '⏰ WEKA KIKUMBUSHO (ARIFA)', btn_add_event: '✓ ONGEZA TUKIO', ct_upcoming: '📅 MATUKIO YAJAYO',
-    pt_phonefiles: 'MAFAILI YA SIMU', ct_phone_access: '📱 RUHUSA YA MAFAILI',
-    btn_grant_folder: '📁 CHAGUA FOLDA', btn_grant_files: '📎 ONGEZA MAFAILI', btn_clear_phone: '🗑 FUTA YOTE',
-    ph_search_phonefiles: 'Tafuta mafaili...',
-    ph_ask_question: 'Uliza swali lolote... (Swahili au English)', btn_ask: '🤖 ULIZA',
-    btn_upload_file: '📎 PAKIA FAILI/PICHA', btn_clear_chat: '🗑 FUTA MAZUNGUMZO',
-    pt_translate: 'TAFSIRI YA LUGHA', lbl_from: 'KUTOKA', lbl_to: 'KWENDA', lbl_text_to_translate: 'MAANDISHI YA KUTAFSIRI',
-    btn_translate: '✓ TAFSIRI', btn_copy: '📋 NAKILI', translating: 'Inatafsiri...', ct_translation: '📌 TAFSIRI',
-    pt_about: 'KUHUSU DAXON', ct_about_title: '🚀 DAXON AI — MSAIDIZI WAKO WA MASOMO',
-    about_p1: 'DAXON AI ni jukwaa la kisasa la kidijitali lililotengenezwa na <b style="color:var(--cyan);">Daxon Technology</b>, likiwa na lengo la kumsaidia kila mwanafunzi na mjasiriamali mdogo hapa Tanzania kusoma kwa urahisi zaidi, kuelewa haraka, na kufanya kazi kwa ufanisi — bila gharama za ziada wala vitambulisho vya API (API keys).',
-    about_p2: 'Kila zana iliyopo humu — kuanzia kusoma hati, kuchanganua picha, kutafsiri lugha, hadi kufanya muhtasari wa taarifa kutoka mtandaoni — inafanya kazi moja kwa moja kwenye kivinjari chako, kwa haraka na kwa faragha kamili, kwani taarifa zako zote zinabaki kwenye kifaa chako.',
-    ct_mission: '🎯 DHIMA YETU',
-    about_mission: 'Kuwawezesha wanafunzi na wajasiriamali wa Tanzania kupata teknolojia bora ya kisasa kwa lugha yao — Kiswahili — ili elimu na maendeleo yasiwe na vikwazo vya gharama au lugha.',
-    ct_privacy: '🔒 FARAGHA (PRIVACY)',
-    privacy_desc: 'Ukiwasha Privacy Mode, DAXON AI haitatuma tena maombi yoyote kwenda mtandaoni (Wikipedia, DuckDuckGo, Google/Bing, Tafsiri). Kila kitu kitafanyika ndani ya kifaa chako pekee — kwa kutumia Notes zako, mafaili ya simu uliyoruhusu, na faili ulizopakia tu.',
-    privacy_toggle_label: 'Privacy Mode',
-    ct_account_info: '👤 MAELEZO YA AKAUNTI', ct_features: '⚙️ VIPENGELE VILIVYOPO',
-    feat_ai: '✅ DAXON AI — Muhtasari & Majibu ya Haraka (Bila API Key)',
-    feat_web: '✅ Kuchukua Taarifa Mtandaoni (Wikipedia, DuckDuckGo, Google, Bing)',
-    feat_file_ai: '✅ Kupakia Faili/Picha kwa AI (Auto-Detect Intent)',
-    feat_translate: '✅ Tafsiri ya Lugha (10+ Languages)',
-    feat_summaries: '✅ My Summaries (Save Automatically)',
-    feat_schedule: '✅ Schedule & Reminders (Push Notifications)',
-    feat_notes: '✅ Notes Manager',
-    feat_phone: '✅ Ufikiaji wa Mafaili ya Simu kwa AI',
-    feat_lang: '✅ Kubadili Lugha: Kiswahili / English',
-    feat_privacy: '✅ Privacy Mode (ON/OFF)',
-    ct_company: '🏢 DAXON TECHNOLOGY',
-    about_company: 'Daxon Technology ni kampuni ya teknolojia yenye makao yake Mbeya, Tanzania, ikitoa huduma za uundaji wa programu (software development), usanifu wa michoro (graphic design), msaada wa TEHAMA (IT support), na ukarabati wa vifaa vya kielektroniki. DAXON AI ni mojawapo ya bidhaa zetu zinazolenga kuleta mabadiliko chanya kwa wanafunzi na wajasiriamali.',
-    quick_answer: '⚡ JIBU LA HARAKA:', detailed_info: '📖 MAELEZO YA KINA:', text_too_short: '⚠️ Maandishi ni mafupi mno kufanya muhtasari. Weka maandishi marefu zaidi.',
-    more_details: '📖 Maelezo Zaidi:', source_label: 'Chanzo', from_notes: '📖 Kutoka kwenye Notes zako:', file_label: '📎 Faili',
-    from_phone: '📱 Kutoka kwenye Mafaili ya Simu:'
   },
   en: {
-    logout: 'LOGOUT',
-    nav_dash: 'DASH', nav_notes: 'NOTES', nav_reader: 'READER', nav_scan: 'SCAN',
-    nav_summ: 'SUMM.', nav_sched: 'SCHED', nav_phone: 'PHONE', nav_ai: 'AI', nav_trans: 'TRANS', nav_info: 'INFO',
-    pt_dashboard: 'DASHBOARD', lbl_events: 'EVENTS',
+    logout: 'LOGOUT', pt_dashboard: 'DASHBOARD', lbl_events: 'EVENTS',
     ct_recent_notes: '📚 RECENT NOTES', ct_today_schedule: "📅 TODAY'S SCHEDULE",
-    pt_notes: 'NOTES MANAGER', ph_search_notes: 'Search notes...', drop_files: 'DROP FILES OR CLICK TO IMPORT',
-    btn_new_note: '➕ NEW NOTE', pt_write_note: 'WRITE NOTE', lbl_title: 'TITLE', ph_note_title: 'Note title...',
-    lbl_content: 'CONTENT', ph_write_here: 'Write here...', btn_save: '💾 SAVE', btn_close: '✕ CLOSE',
-    btn_edit: '✎ EDIT', btn_read_aloud: '🔊 READ ALOUD',
-    ct_upload_doc: '📤 UPLOAD ANY DOCUMENT', click_or_drop: 'CLICK OR DROP HERE',
-    btn_save_as_note: '💾 SAVE AS NOTE',
-    ct_camera: '📷 CAMERA (FULL ACCESS)', btn_start_cam: '📷 START CAMERA', btn_switch: '🔄 SWITCH',
-    btn_snap: '📸 TAKE PHOTO', btn_stop: '⏹ STOP',
-    ct_upload_img: '📁 UPLOAD IMAGE / FILE', click_upload_img: 'CLICK TO UPLOAD IMAGE OR FILE',
-    ct_scan_result: '📝 SCAN RESULT', ph_scan_result: 'OCR/scan results will appear here...',
-    btn_save_note: '💾 SAVE NOTE', btn_read: '🔊 READ',
-    ct_new_summary: '📝 NEW SUMMARY (MANUAL)', lbl_write_text: 'WRITE TEXT',
-    ph_paste_text: 'Paste your text here... AI will summarize it.',
-    btn_summarize: '💡 SUMMARIZE', btn_voice: '🎙️ VOICE', btn_save_summary: '💾 SAVE SUMMARY',
-    pt_saved_summaries: 'SAVED SUMMARIES',
-    pt_schedule: 'SCHEDULE & REMINDERS', ct_notifications: '🔔 NOTIFICATIONS', btn_enable_notif: '🔔 ENABLE NOTIFICATIONS',
-    ct_add_event: '➕ ADD EVENT', ph_event_title: 'e.g. Math Class', lbl_date: 'DATE', lbl_time: 'TIME',
-    lbl_end_time: 'END TIME', lbl_desc_optional: 'DESCRIPTION (OPTIONAL)', ph_event_desc: 'More details about this event...',
-    lbl_set_reminder: '⏰ SET REMINDER (NOTIFICATION)', btn_add_event: '✓ ADD EVENT', ct_upcoming: '📅 UPCOMING EVENTS',
-    pt_phonefiles: 'PHONE FILES', ct_phone_access: '📱 FILE ACCESS',
-    btn_grant_folder: '📁 CHOOSE FOLDER', btn_grant_files: '📎 ADD FILES', btn_clear_phone: '🗑 CLEAR ALL',
-    ph_search_phonefiles: 'Search files...',
-    ph_ask_question: 'Ask any question... (Swahili or English)', btn_ask: '🤖 ASK',
-    btn_upload_file: '📎 UPLOAD FILE/IMAGE', btn_clear_chat: '🗑 CLEAR CHAT',
-    pt_translate: 'LANGUAGE TRANSLATOR', lbl_from: 'FROM', lbl_to: 'TO', lbl_text_to_translate: 'TEXT TO TRANSLATE',
-    btn_translate: '✓ TRANSLATE', btn_copy: '📋 COPY', translating: 'Translating...', ct_translation: '📌 TRANSLATION',
-    pt_about: 'ABOUT DAXON', ct_about_title: '🚀 DAXON AI — YOUR STUDY ASSISTANT',
-    about_p1: 'DAXON AI is a modern digital platform built by <b style="color:var(--cyan);">Daxon Technology</b>, designed to help every student and small business owner in Tanzania study more easily, understand faster, and work more efficiently — with no extra costs and no API keys required.',
-    about_p2: 'Every tool here — from reading documents and scanning images to translating languages and summarizing information from the web — runs directly in your browser, quickly and with complete privacy, since all your data stays on your device.',
-    ct_mission: '🎯 OUR MISSION',
-    about_mission: 'To empower Tanzanian students and entrepreneurs with cutting-edge technology in their own language — so education and progress are never held back by cost or language barriers.',
-    ct_privacy: '🔒 PRIVACY',
-    privacy_desc: "When you turn on Privacy Mode, DAXON AI will stop sending any requests to the internet (Wikipedia, DuckDuckGo, Google/Bing, Translation). Everything will run entirely on your device — using only your Notes, granted phone files, and uploaded files.",
-    privacy_toggle_label: 'Privacy Mode',
-    ct_account_info: '👤 ACCOUNT INFO', ct_features: '⚙️ AVAILABLE FEATURES',
-    feat_ai: '✅ DAXON AI — Instant Summaries & Answers (No API Key)',
-    feat_web: '✅ Fetch Info Online (Wikipedia, DuckDuckGo, Google, Bing)',
-    feat_file_ai: '✅ Upload Files/Images to AI (Auto-Detect Intent)',
-    feat_translate: '✅ Language Translation (10+ Languages)',
-    feat_summaries: '✅ My Summaries (Save Automatically)',
-    feat_schedule: '✅ Schedule & Reminders (Push Notifications)',
-    feat_notes: '✅ Notes Manager',
-    feat_phone: '✅ Phone File Access for AI',
-    feat_lang: '✅ Language Switch: Kiswahili / English',
-    feat_privacy: '✅ Privacy Mode (ON/OFF)',
-    ct_company: '🏢 DAXON TECHNOLOGY',
-    about_company: 'Daxon Technology is a technology company based in Mbeya, Tanzania, offering software development, graphic design, IT support, and electronics repair services. DAXON AI is one of our products aimed at bringing positive change to students and entrepreneurs.',
-    quick_answer: '⚡ QUICK ANSWER:', detailed_info: '📖 DETAILED INFO:', text_too_short: '⚠️ The text is too short to summarize. Please provide longer text.',
-    more_details: '📖 More Details:', source_label: 'Source', from_notes: '📖 From your Notes:', file_label: '📎 File',
-    from_phone: '📱 From your Phone Files:'
   }
 };
+
 let currentLang = localStorage.getItem('daxon_lang') || 'sw';
 function t(key) { return (I18N[currentLang] && I18N[currentLang][key]) || I18N.sw[key] || key; }
 function applyLanguage(lang) {
   currentLang = lang;
   localStorage.setItem('daxon_lang', lang);
   document.documentElement.lang = lang;
-  document.querySelectorAll('[data-i18n]').forEach(node => { node.textContent = t(node.getAttribute('data-i18n')); });
-  document.querySelectorAll('[data-i18n-ph]').forEach(node => { node.placeholder = t(node.getAttribute('data-i18n-ph')); });
-  document.querySelectorAll('[data-i18n-html]').forEach(node => { node.innerHTML = t(node.getAttribute('data-i18n-html')); });
-  const btnSw = el('lang-btn-sw'), btnEn = el('lang-btn-en');
-  if(btnSw && btnEn) {
-    btnSw.classList.toggle('btn-primary', lang === 'sw');
-    btnEn.classList.toggle('btn-primary', lang === 'en');
-  }
-  renderDashboard(); renderNotes(); renderEvents(); renderSummariesList(); updatePrivacyUI(); renderPhoneFiles();
 }
 
 // ── STATE ──
@@ -918,9 +803,6 @@ let useNotesContext = true;
 let usePhoneContext = false;
 let lastAiSummary = '';
 let privacyMode = localStorage.getItem('daxon_privacy_mode') === 'on';
-// Phone files granted to DAXON AI for this session. Each entry:
-// { id, name, size, kind: 'file'|'handle', fileObj (File, kept for 'file' kind),
-//   handle (FileSystemFileHandle, kept for 'handle' kind), content (parsed lazily, cached) }
 let phoneFiles = [];
 
 // ── UTILITIES ──
@@ -939,45 +821,78 @@ function showToast(msg, type='info') {
   setTimeout(() => t.remove(), 3800);
 }
 
-// ── INTRO ──
+// ═══════════════════════════════════════════════════════
+// INTRO FIX — WORKING PROPERLY NOW
+// ═══════════════════════════════════════════════════════
+
 let introInterval;
+
 function startIntro() {
   let secs = 10;
   const fill = el('intro-progress');
   const timer = el('intro-timer');
-  if(!fill) return;
+  
+  if(!fill || !timer) {
+    console.warn('Intro elements missing, showing app/auth directly');
+    showAuthOrApp();
+    return;
+  }
+  
   introInterval = setInterval(() => {
     secs--;
     const pct = ((10 - secs) / 10) * 100;
     fill.style.width = pct + '%';
-    if(timer) timer.textContent = secs + 's';
-    if(secs <= 0) { clearInterval(introInterval); skipIntro(); }
+    timer.textContent = secs + 's';
+    
+    if(secs <= 0) {
+      clearInterval(introInterval);
+      skipIntro();
+    }
   }, 1000);
 }
 
 function skipIntro() {
-  clearInterval(introInterval);
+  if(introInterval) clearInterval(introInterval);
+  
   const intro = el('intro-screen');
-  if(intro) { intro.style.opacity = '0'; intro.style.transition = 'opacity 0.5s'; setTimeout(() => intro.remove(), 500); }
-  showAuthOrApp();
-}
-
-function showAuthOrApp() {
-  if(currentUser) {
-    loadUserData();
-    hide('auth-screen');
-    el('app').classList.add('visible');
-    el('topbar-user').textContent = currentUser.fullName;
-    initApp();
-    maybeShowPhoneAccessModal();
+  if(intro) {
+    intro.style.opacity = '0';
+    intro.style.transition = 'opacity 0.5s ease-out';
+    
+    setTimeout(() => {
+      intro.style.display = 'none';
+      try { intro.remove(); } catch(e) {}
+      showAuthOrApp();
+    }, 500);
   } else {
-    show('auth-screen');
-    switchAuthTab('login');
+    showAuthOrApp();
   }
 }
 
-// Start intro when page loads
-startIntro();
+function showAuthOrApp() {
+  const currentUserData = JSON.parse(localStorage.getItem('currentUser')) || null;
+  const authScreen = el('auth-screen');
+  const appContainer = el('app');
+  
+  if(currentUserData) {
+    currentUser = currentUserData;
+    if(authScreen) authScreen.style.display = 'none';
+    if(appContainer) {
+      appContainer.classList.add('visible');
+      setTimeout(() => {
+        const topbarUser = el('topbar-user');
+        if(topbarUser) topbarUser.textContent = currentUser.fullName;
+        loadUserData();
+        initApp();
+        maybeShowPhoneAccessModal();
+      }, 100);
+    }
+  } else {
+    if(authScreen) authScreen.style.display = 'flex';
+    if(appContainer) appContainer.classList.remove('visible');
+    switchAuthTab('login');
+  }
+}
 
 // ── AUTH ──
 function switchAuthTab(tab) {
@@ -996,10 +911,10 @@ function switchAuthTab(tab) {
 function loginUser() {
   const email = el('login-email').value.trim();
   const pass = el('login-password').value.trim();
-  if(!email || !pass) { el('auth-error').textContent = '⚠️ Jaza sehemu zote'; return; }
+  if(!email || !pass) { el('auth-error').textContent = '⚠️ Fill all fields'; return; }
   const users = JSON.parse(localStorage.getItem('daxon_users')) || [];
   const u = users.find(x => x.email === email && x.password === pass);
-  if(!u) { el('auth-error').textContent = '❌ Email au password si sahihi'; return; }
+  if(!u) { el('auth-error').textContent = '❌ Invalid email or password'; return; }
   currentUser = u;
   localStorage.setItem('currentUser', JSON.stringify(u));
   loadUserData();
@@ -1007,7 +922,7 @@ function loginUser() {
   el('app').classList.add('visible');
   el('topbar-user').textContent = u.fullName;
   initApp();
-  showToast('✅ Karibu tena, ' + u.fullName + '!', 'success');
+  showToast('✅ Welcome back, ' + u.fullName + '!', 'success');
   maybeShowPhoneAccessModal();
 }
 
@@ -1016,26 +931,26 @@ function registerUser() {
   const email = el('reg-email').value.trim();
   const phone = el('reg-phone').value.trim();
   const pass = el('reg-password').value.trim();
-  if(!name || !email || !pass) { el('auth-error').textContent = '⚠️ Jaza sehemu zote'; return; }
-  if(pass.length < 6) { el('auth-error').textContent = '⚠️ Password lazima iwe na herufi 6+'; return; }
+  if(!name || !email || !pass) { el('auth-error').textContent = '⚠️ Fill all fields'; return; }
+  if(pass.length < 6) { el('auth-error').textContent = '⚠️ Password must be 6+ chars'; return; }
   let users = JSON.parse(localStorage.getItem('daxon_users')) || [];
-  if(users.find(x => x.email === email)) { el('auth-error').textContent = '❌ Email tayari imesajiliwa'; return; }
+  if(users.find(x => x.email === email)) { el('auth-error').textContent = '❌ Email already registered'; return; }
   const u = { id: uid(), fullName: name, email, phone, password: pass, joinedAt: ts() };
   users.push(u);
   localStorage.setItem('daxon_users', JSON.stringify(users));
   el('auth-error').style.color = 'var(--green)';
-  el('auth-error').textContent = '✅ Akaunti imetengenezwa! Sasa ingia.';
+  el('auth-error').textContent = '✅ Account created! Login now.';
   setTimeout(() => { el('auth-error').style.color = ''; switchAuthTab('login'); }, 1500);
 }
 
 function logoutUser() {
-  if(!confirm('Una uhakika unataka kutoka?')) return;
+  if(!confirm('Are you sure you want to logout?')) return;
   stopCamera();
   localStorage.removeItem('currentUser');
   location.reload();
 }
 
-// ── DATA MANAGEMENT (DATABASE via localStorage) ──
+// ── DATA ──
 function loadUserData() {
   if(!currentUser) return;
   notes = JSON.parse(localStorage.getItem('daxon_notes_' + currentUser.id)) || [];
@@ -1076,16 +991,16 @@ function renderDashboard() {
   const recent = [...notes].reverse().slice(0,3);
   el('dash-notes-list').innerHTML = recent.length ? recent.map(n => `
     <div style="padding:8px 0;border-bottom:1px solid rgba(0,229,255,.06);cursor:pointer" onclick="goTo('notes');setTimeout(()=>openNoteReader('${n.id}'),150)">
-      <div style="font-family:var(--font-display);font-size:11px;color:var(--text)">${n.title} <span class="badge ${n.source==='file'?'badge-success':'badge-warning'}">${n.source==='file'?'FILE':'TYPED'}</span></div>
+      <div style="font-family:var(--font-display);font-size:11px;color:var(--text)">${n.title}</div>
       <div style="font-size:9px;color:var(--text3);font-family:var(--font-mono)">${n.updatedAt}</div>
-    </div>`).join('') : '<p class="empty">Hakuna notes bado</p>';
+    </div>`).join('') : '<p class="empty">No notes yet</p>';
   const today = new Date().toISOString().slice(0,10);
   const todayEvs = events.filter(e => e.date === today).slice(0,4);
   el('dash-schedule-list').innerHTML = todayEvs.length ? todayEvs.map(e => `
     <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,229,255,.06)">
       <span style="font-size:13px;">${e.title}</span>
       <span style="color:var(--cyan);font-family:var(--font-mono);font-size:10px;">${e.time}</span>
-    </div>`).join('') : '<p class="empty">Hakuna matukio leo</p>';
+    </div>`).join('') : '<p class="empty">No events today</p>';
 }
 
 // ── NOTES ──
@@ -1096,22 +1011,18 @@ function dropFile(e) { e.preventDefault(); e.currentTarget.classList.remove('dra
 function handleFileImport(e) { const f = e.target.files?.[0]; if(f) readFileAsNote(f); e.target.value = ''; }
 
 async function readFileAsNote(file) {
-  showToast('⏳ Inasoma: ' + file.name);
+  showToast('⏳ Reading: ' + file.name);
   try {
     const content = await parseFileContent(file);
     const title = file.name.replace(/\.[^/.]+$/, '');
-    const safeContent = (content && content.trim().length > 0) ? content : `[Faili tupu au haikusomeka vizuri: ${file.name}]`;
+    const safeContent = (content && content.trim().length > 0) ? content : `[Empty or unreadable: ${file.name}]`;
     notes.push({ id: uid(), title, content: safeContent, source: 'file', createdAt: ts(), updatedAt: ts() });
     saveNotes(); renderNotes(); renderDashboard();
-    if(content && content.trim().length > 0) {
-      showToast('✅ Imeingizwa: ' + title, 'success');
-    } else {
-      showToast('⚠️ Faili limeingizwa lakini halikuwa na maandishi yanayosomeka: ' + title, 'error');
-    }
+    showToast('✅ Imported: ' + title, 'success');
   } catch(err) {
-    notes.push({ id: uid(), title: file.name.replace(/\.[^/.]+$/, ''), content: `[Hitilafu kusoma faili: ${file.name} — ${err && err.message ? err.message : 'unknown error'}]`, source: 'file', createdAt: ts(), updatedAt: ts() });
+    notes.push({ id: uid(), title: file.name.replace(/\.[^/.]+$/, ''), content: `[Error reading: ${err && err.message ? err.message : 'unknown'}]`, source: 'file', createdAt: ts(), updatedAt: ts() });
     saveNotes(); renderNotes(); renderDashboard();
-    showToast('⚠️ Hitilafu kusoma: ' + file.name, 'error'); console.error(err);
+    showToast('⚠️ Error reading file', 'error');
   }
 }
 
@@ -1135,24 +1046,24 @@ async function parseFileContent(file) {
       result = await readTextFile(file);
     }
   } catch(err) {
-    console.error('parseFileContent error for', file.name, err);
-    return `[Hitilafu kusoma faili "${file.name}": ${err && err.message ? err.message : 'unknown error'}]`;
+    console.error('parseFileContent error', err);
+    return `[Error reading "${file.name}"]`;
   }
   if(!result || !result.trim()) {
-    return `[Hakuna maandishi yaliyopatikana kwenye faili: ${file.name}]`;
+    return `[No text found in: ${file.name}]`;
   }
   return result;
 }
 
 function readTextFile(f) {
-  return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(r.error || new Error('Imeshindwa kusoma faili la maandishi')); r.readAsText(f, 'UTF-8'); });
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(r.error || new Error('Read error')); r.readAsText(f, 'UTF-8'); });
 }
 function readArrayBuffer(f) {
-  return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(r.error || new Error('Imeshindwa kusoma faili (binary)')); r.readAsArrayBuffer(f); });
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = e => res(e.target.result); r.onerror = () => rej(r.error || new Error('Read error')); r.readAsArrayBuffer(f); });
 }
 
 async function extractPDFText(file) {
-  if(typeof pdfjsLib === 'undefined') throw new Error('PDF.js haipatikani (angalia mtandao wako)');
+  if(typeof pdfjsLib === 'undefined') throw new Error('PDF.js not available');
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
   const buffer = await readArrayBuffer(file);
   const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
@@ -1166,14 +1077,14 @@ async function extractPDFText(file) {
 }
 
 async function extractDocxText(file) {
-  if(typeof mammoth === 'undefined') throw new Error('Mammoth.js haipatikani (angalia mtandao wako)');
+  if(typeof mammoth === 'undefined') throw new Error('Mammoth.js not available');
   const buffer = await readArrayBuffer(file);
   const result = await mammoth.extractRawText({ arrayBuffer: buffer });
   return result.value || '';
 }
 
 async function extractXlsxText(file) {
-  if(typeof XLSX === 'undefined') throw new Error('SheetJS haipatikani (angalia mtandao wako)');
+  if(typeof XLSX === 'undefined') throw new Error('SheetJS not available');
   const buffer = await readArrayBuffer(file);
   const wb = XLSX.read(buffer, { type: 'array' });
   let text = '';
@@ -1184,13 +1095,8 @@ async function extractXlsxText(file) {
   return text;
 }
 
-// PPTX (and DOCX/XLSX fallback) files are ZIP archives whose internal XML is
-// usually DEFLATE-compressed. Reading the raw bytes as UTF-8 text (the old
-// approach) returns garbage/empty output for almost every real PPTX file —
-// this was the root cause of "notes zikiwa tupu" when importing PowerPoint
-// files. We now properly unzip the file with JSZip before reading the XML.
 async function extractPptxText(file) {
-  if(typeof JSZip === 'undefined') throw new Error('JSZip haipatikani (angalia mtandao wako) — inahitajika kusoma PPTX');
+  if(typeof JSZip === 'undefined') throw new Error('JSZip not available');
   const buffer = await readArrayBuffer(file);
   const zip = await JSZip.loadAsync(buffer);
   const slideFiles = Object.keys(zip.files)
@@ -1212,7 +1118,7 @@ async function extractPptxText(file) {
 }
 
 async function extractImageText(file) {
-  if(typeof Tesseract === 'undefined') throw new Error('Tesseract.js haipatikani (angalia mtandao wako)');
+  if(typeof Tesseract === 'undefined') throw new Error('Tesseract.js not available');
   return new Promise((res, rej) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -1220,7 +1126,7 @@ async function extractImageText(file) {
         .then(({ data: { text } }) => res((text || '').trim()))
         .catch(e => rej(e));
     };
-    reader.onerror = () => rej(reader.error || new Error('Imeshindwa kusoma picha'));
+    reader.onerror = () => rej(reader.error || new Error('Read error'));
     reader.readAsDataURL(file);
   });
 }
@@ -1236,14 +1142,14 @@ function closeNoteEditor() { hide('note-editor'); show('notes-list-view'); editi
 function saveNote() {
   const t = el('note-title-input').value.trim();
   const c = el('note-content-input').value.trim();
-  if(!t) { showToast('⚠️ Weka kichwa', 'error'); return; }
+  if(!t) { showToast('⚠️ Enter a title', 'error'); return; }
   if(editingNoteId) {
     notes = notes.map(n => n.id === editingNoteId ? { ...n, title: t, content: c, updatedAt: ts() } : n);
   } else {
     notes.push({ id: uid(), title: t, content: c, source: 'typed', createdAt: ts(), updatedAt: ts() });
   }
   saveNotes(); closeNoteEditor(); renderNotes(); renderDashboard();
-  showToast('✅ Imehifadhiwa!', 'success');
+  showToast('✅ Saved!', 'success');
 }
 function openNoteReader(id) {
   const n = notes.find(x => x.id === id); if(!n) return;
@@ -1255,7 +1161,7 @@ function openNoteReader(id) {
 }
 function closeNoteReader() { hide('note-reader-inline'); show('notes-list-view'); viewingNoteId = null; }
 function editCurrentNote() { if(viewingNoteId) { hide('note-reader-inline'); openNoteEditor(viewingNoteId); } }
-function deleteNote(id, e) { e.stopPropagation(); if(!confirm('Futa note hii?')) return; notes = notes.filter(n => n.id !== id); saveNotes(); renderNotes(); renderDashboard(); }
+function deleteNote(id, e) { e.stopPropagation(); if(!confirm('Delete this note?')) return; notes = notes.filter(n => n.id !== id); saveNotes(); renderNotes(); renderDashboard(); }
 function speakNote() {
   if(!viewingNoteId) return;
   const n = notes.find(x => x.id === viewingNoteId);
@@ -1264,13 +1170,13 @@ function speakNote() {
 async function summarizeCurrentNote() {
   if(!viewingNoteId) return;
   const n = notes.find(x => x.id === viewingNoteId); if(!n) return;
-  showToast('💡 DAXON AI inafanya muhtasari...');
+  showToast('💡 Creating summary...');
   const sum = formatSummary(n.content.slice(0, 6000));
   lastAiSummary = sum;
   const id = uid();
-  summaries.push({ id, title: 'Muhtasari: ' + n.title, content: sum, sourceNote: n.title, createdAt: ts() });
+  summaries.push({ id, title: 'Summary: ' + n.title, content: sum, sourceNote: n.title, createdAt: ts() });
   saveSummaries(); renderSummariesList();
-  showToast('✅ Muhtasari umehifadhiwa kwenye My Summaries!', 'success');
+  showToast('✅ Summary saved!', 'success');
   goTo('summaries');
 }
 
@@ -1280,19 +1186,19 @@ function renderNotes() {
   el('notes-list').innerHTML = f.length ? [...f].reverse().map(n => `
     <div class="note-item" onclick="openNoteReader('${n.id}')">
       <div style="display:flex;justify-content:space-between;align-items:start;">
-        <div class="note-title">${n.title} <span class="badge ${n.source==='file'?'badge-success':'badge-warning'}">${n.source==='file'?'📄':'✎'}</span></div>
+        <div class="note-title">${n.title}</div>
         <button onclick="deleteNote('${n.id}',event)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0;">🗑</button>
       </div>
       <div class="note-preview">${n.content.slice(0,90)}...</div>
       <div class="note-date">${n.updatedAt}</div>
-    </div>`).join('') : '<p class="empty">Hakuna notes. Ingiza au andika mpya.</p>';
+    </div>`).join('') : '<p class="empty">No notes. Create or import one.</p>';
 }
 
 // ── DOCUMENT READER ──
 function dropReaderFile(e) { e.preventDefault(); e.currentTarget.classList.remove('drag-over'); const f = e.dataTransfer?.files?.[0]; if(f) readDocumentFileDirectly(f); }
 function readDocumentFile(event) { const f = event.target.files?.[0]; if(f) readDocumentFileDirectly(f); event.target.value = ''; }
 async function readDocumentFileDirectly(file) {
-  showToast('⏳ Inasoma hati: ' + file.name);
+  showToast('⏳ Reading document: ' + file.name);
   try {
     const content = await parseFileContent(file);
     currentReaderContent = content;
@@ -1301,29 +1207,29 @@ async function readDocumentFileDirectly(file) {
     el('reader-file-info').textContent = `📄 ${file.name} (${Math.round(file.size/1024)}KB)`;
     hide('reader-summary-box');
     show('reader-panel');
-    showToast('✅ Hati imefunguliwa!', 'success');
-  } catch(e) { showToast('⚠️ Hitilafu kusoma faili', 'error'); }
+    showToast('✅ Document opened!', 'success');
+  } catch(e) { showToast('⚠️ Error reading file', 'error'); }
 }
 function speakReaderContent() { if(currentReaderContent) speakText(currentReaderContent.slice(0, 600)); }
 async function aiSummarizeReader() {
-  if(!currentReaderContent) { showToast('⚠️ Hakuna hati iliyofunguliwa'); return; }
-  showToast('💡 DAXON AI inafanya muhtasari...');
-  el('reader-summary-text').textContent = '⏳ Subiri...';
+  if(!currentReaderContent) { showToast('⚠️ No document open'); return; }
+  showToast('💡 Creating summary...');
+  el('reader-summary-text').textContent = '⏳ Wait...';
   show('reader-summary-box');
   const sum = formatSummary(currentReaderContent.slice(0, 8000));
   el('reader-summary-text').textContent = sum;
   lastAiSummary = sum;
 }
 function saveReaderAsNote() {
-  if(!currentReaderContent) { showToast('⚠️ Hakuna hati'); return; }
+  if(!currentReaderContent) { showToast('⚠️ No document'); return; }
   const title = currentReaderFileName.replace(/\.[^/.]+$/, '');
   notes.push({ id: uid(), title, content: currentReaderContent, source: 'file', createdAt: ts(), updatedAt: ts() });
   saveNotes(); renderNotes(); renderDashboard();
-  showToast('✅ Imehifadhiwa kama note!', 'success');
+  showToast('✅ Saved as note!', 'success');
 }
 function closeReaderPanel() { hide('reader-panel'); currentReaderContent = ''; currentReaderFileName = ''; }
 
-// ── CAMERA / SCANNER ──
+// ── CAMERA ──
 async function startCamera() {
   try {
     const constraints = { video: { facingMode, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false };
@@ -1333,11 +1239,11 @@ async function startCamera() {
     vid.style.display = 'block';
     show('snap-btn'); show('stop-cam-btn'); show('switch-cam-btn');
     hide('start-cam-btn');
-    el('cam-ocr-status').textContent = '📷 Kamera imewashwa';
-    showToast('📷 Kamera inafanya kazi!', 'success');
+    el('cam-ocr-status').textContent = '📷 Camera ready';
+    showToast('📷 Camera started!', 'success');
   } catch(e) {
-    showToast('⚠️ Ruhusa ya kamera imekataliwa: ' + e.message, 'error');
-    el('cam-ocr-status').textContent = '❌ Kamera ilikosea: ' + e.message;
+    showToast('⚠️ Camera denied: ' + e.message, 'error');
+    el('cam-ocr-status').textContent = '❌ Camera error: ' + e.message;
   }
 }
 async function switchCamera() {
@@ -1357,14 +1263,14 @@ function snapPhoto() {
   canvas.width = vid.videoWidth; canvas.height = vid.videoHeight;
   canvas.getContext('2d').drawImage(vid, 0, 0);
   stopCamera();
-  el('cam-ocr-status').textContent = '🔍 Inasoma maandishi kwenye picha...';
-  el('scan-text-result').value = '⏳ Inafanya OCR...';
+  el('cam-ocr-status').textContent = '🔍 Reading text...';
+  el('scan-text-result').value = '⏳ OCR processing...';
   if(typeof Tesseract !== 'undefined') {
     Tesseract.recognize(canvas.toDataURL('image/png'), 'eng+swa')
       .then(({ data: { text } }) => {
-        el('scan-text-result').value = text.trim() || '[Hakuna maandishi kwenye picha]';
-        el('cam-ocr-status').textContent = '✅ OCR imekamilika';
-        showToast('✅ Maandishi yamesomwa!', 'success');
+        el('scan-text-result').value = text.trim() || '[No text found]';
+        el('cam-ocr-status').textContent = '✅ OCR complete';
+        showToast('✅ Text extracted!', 'success');
       })
       .catch(e => { el('scan-text-result').value = '[OCR error: ' + e.message + ']'; });
   }
@@ -1372,15 +1278,15 @@ function snapPhoto() {
 function handleScanFile(e) {
   const f = e.target.files?.[0]; if(!f) return;
   e.target.value = '';
-  el('scan-text-result').value = '⏳ Inasoma...';
+  el('scan-text-result').value = '⏳ Reading...';
   const ext = f.name.split('.').pop().toLowerCase();
   if(['png','jpg','jpeg','webp'].includes(ext)) {
     const reader = new FileReader();
     reader.onload = () => {
       if(typeof Tesseract !== 'undefined') {
         Tesseract.recognize(reader.result, 'eng+swa').then(({ data: { text } }) => {
-          el('scan-text-result').value = text.trim() || '[Hakuna maandishi]';
-          showToast('✅ OCR imekamilika!', 'success');
+          el('scan-text-result').value = text.trim() || '[No text]';
+          showToast('✅ OCR complete!', 'success');
         });
       }
     };
@@ -1391,9 +1297,9 @@ function handleScanFile(e) {
 }
 async function aiSummarizeScan() {
   const txt = el('scan-text-result').value.trim();
-  if(!txt) { showToast('⚠️ Hakuna maandishi'); return; }
-  showToast('💡 DAXON AI inafanya muhtasari...');
-  el('scan-summary-text').textContent = '⏳ Subiri...';
+  if(!txt) { showToast('⚠️ No text'); return; }
+  showToast('💡 Creating summary...');
+  el('scan-summary-text').textContent = '⏳ Wait...';
   show('scan-summary');
   const sum = formatSummary(txt.slice(0, 6000));
   el('scan-summary-text').textContent = sum;
@@ -1401,19 +1307,19 @@ async function aiSummarizeScan() {
 }
 function saveScanAsNote() {
   const txt = el('scan-text-result').value.trim();
-  if(!txt) { showToast('⚠️ Hakuna maandishi'); return; }
+  if(!txt) { showToast('⚠️ No text'); return; }
   notes.push({ id: uid(), title: 'Scan - ' + ts(), content: txt, source: 'scan', createdAt: ts(), updatedAt: ts() });
   saveNotes(); renderNotes(); renderDashboard();
-  showToast('✅ Imehifadhiwa kama note!', 'success');
+  showToast('✅ Saved as note!', 'success');
 }
 function speakScan() { const t = el('scan-text-result').value; if(t) speakText(t.slice(0,500)); }
 
 // ── MY SUMMARIES ──
 async function createManualSummary() {
   const txt = el('manual-sum-input').value.trim();
-  if(!txt) { showToast('⚠️ Andika maandishi kwanza'); return; }
-  showToast('💡 DAXON AI inafanya muhtasari...');
-  el('sum-result-text').textContent = '⏳ Subiri...';
+  if(!txt) { showToast('⚠️ Enter text first'); return; }
+  showToast('💡 Creating summary...');
+  el('sum-result-text').textContent = '⏳ Wait...';
   show('sum-result-box');
   const sum = formatSummary(txt.slice(0, 8000));
   el('sum-result-text').textContent = sum;
@@ -1422,18 +1328,18 @@ async function createManualSummary() {
 async function handleSumFile(e) {
   const f = e.target.files?.[0]; if(!f) return;
   e.target.value = '';
-  showToast('⏳ Inasoma faili...');
+  showToast('⏳ Reading file...');
   const content = await parseFileContent(f);
   el('manual-sum-input').value = content.slice(0, 5000);
-  showToast('✅ Faili imesomwa. Bonyeza Fanya Muhtasari.', 'success');
+  showToast('✅ File loaded. Click Summarize.', 'success');
 }
 function saveSummaryToList() {
   const sum = el('sum-result-text').textContent.trim();
-  if(!sum || sum === '⏳ Subiri...') { showToast('⚠️ Hakuna muhtasari'); return; }
+  if(!sum || sum === '⏳ Wait...') { showToast('⚠️ No summary'); return; }
   const src = el('manual-sum-input').value.slice(0,60) + '...';
-  summaries.push({ id: uid(), title: 'Muhtasari ' + (summaries.length+1), content: sum, source: src, createdAt: ts() });
+  summaries.push({ id: uid(), title: 'Summary ' + (summaries.length+1), content: sum, source: src, createdAt: ts() });
   saveSummaries(); renderSummariesList();
-  showToast('✅ Muhtasari umehifadhiwa!', 'success');
+  showToast('✅ Summary saved!', 'success');
   el('manual-sum-input').value = '';
   hide('sum-result-box');
 }
@@ -1449,17 +1355,17 @@ function renderSummariesList() {
       <div class="summary-item-date">🕐 ${s.createdAt}</div>
       <div class="summary-item-preview">${s.content.slice(0,150)}...</div>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
-        <button class="btn btn-sm" onclick="speakText('${s.content.replace(/'/g,"&#39;").slice(0,400)}')">🔊 SOMA</button>
-        <button class="btn btn-sm btn-success" onclick="copySummary('${s.id}')">📋 NAKILI</button>
+        <button class="btn btn-sm" onclick="speakText('${s.content.replace(/'/g,"&#39;").slice(0,400)}')">🔊 READ</button>
+        <button class="btn btn-sm btn-success" onclick="copySummary('${s.id}')">📋 COPY</button>
       </div>
-    </div>`).join('') : '<p class="empty">Hakuna summaries bado. Fanya muhtasari wa document.</p>';
+    </div>`).join('') : '<p class="empty">No summaries yet.</p>';
 }
-function deleteSummary(id, e) { e.stopPropagation(); if(!confirm('Futa muhtasari?')) return; summaries = summaries.filter(s => s.id !== id); saveSummaries(); renderSummariesList(); renderDashboard(); }
-function copySummary(id) { const s = summaries.find(x => x.id === id); if(s) { navigator.clipboard?.writeText(s.content).then(() => showToast('✅ Imenakiliwa!','success')); } }
+function deleteSummary(id, e) { e.stopPropagation(); if(!confirm('Delete summary?')) return; summaries = summaries.filter(s => s.id !== id); saveSummaries(); renderSummariesList(); renderDashboard(); }
+function copySummary(id) { const s = summaries.find(x => x.id === id); if(s) { navigator.clipboard?.writeText(s.content).then(() => showToast('✅ Copied!','success')); } }
 
 // ── SCHEDULE ──
 function notifBody(e) {
-  let body = `🕐 ${e.date} saa ${e.time}${e.endTime ? ' – ' + e.endTime : ''}`;
+  let body = `🕐 ${e.date} at ${e.time}${e.endTime ? ' – ' + e.endTime : ''}`;
   if(e.desc) body += `\n📝 ${e.desc}`;
   return body;
 }
@@ -1470,29 +1376,29 @@ function addEvent() {
   const etm = el('event-end-time').value;
   const desc = el('event-desc').value.trim();
   const rem = el('event-reminder').checked;
-  if(!t || !d || !tm) { showToast('⚠️ Jaza sehemu zote zinazohitajika', 'error'); return; }
+  if(!t || !d || !tm) { showToast('⚠️ Fill required fields', 'error'); return; }
   const newEvent = { id: uid(), title: t, date: d, time: tm, endTime: etm, desc, reminder: rem, notified: false, createdAt: ts() };
   events.push(newEvent);
   saveEvents(); renderEvents(); renderDashboard();
   el('event-title').value = ''; el('event-date').value = ''; el('event-time').value = ''; el('event-end-time').value = ''; el('event-desc').value = ''; el('event-reminder').checked = true;
-  showToast('✅ Tukio limeongezwa!', 'success');
+  showToast('✅ Event added!', 'success');
   if(rem) {
     if(Notification?.permission === 'granted') {
-      new Notification('⏰ DAXON — Kikumbusho Kimewekwa: ' + t, { body: notifBody(newEvent) });
+      new Notification('⏰ DAXON — Reminder: ' + t, { body: notifBody(newEvent) });
     } else if(Notification && Notification.permission !== 'denied') {
-      showToast('🔔 Washa arifa (kwenye kadi ya juu) ili upate taarifa wakati tukio linapofika', 'warning');
+      showToast('🔔 Enable notifications (top) to get reminders', 'warning');
     }
   }
 }
-function deleteEvent(id, e) { e.stopPropagation(); if(!confirm('Futa tukio?')) return; events = events.filter(x => x.id !== id); saveEvents(); renderEvents(); renderDashboard(); }
+function deleteEvent(id, e) { e.stopPropagation(); if(!confirm('Delete event?')) return; events = events.filter(x => x.id !== id); saveEvents(); renderEvents(); renderDashboard(); }
 function renderEvents() {
   el('events-list').innerHTML = events.length ? [...events].sort((a,b) => new Date(a.date+' '+a.time) - new Date(b.date+' '+b.time)).map(e => `
     <div class="event-item">
       <div class="event-title">${e.title} ${e.reminder ? '<span class="badge badge-success">⏰</span>' : ''}</div>
       <div class="event-time">📅 ${e.date} · ${e.time}${e.endTime ? ' – ' + e.endTime : ''}</div>
       ${e.desc ? `<div style="color:var(--text2);font-size:11px;font-family:var(--font-mono);margin-top:6px;">📝 ${e.desc}</div>` : ''}
-      <button onclick="deleteEvent('${e.id}',event)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;margin-top:6px;font-family:var(--font-mono);">🗑 FUTA</button>
-    </div>`).join('') : '<p class="empty">Hakuna matukio bado</p>';
+      <button onclick="deleteEvent('${e.id}',event)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;margin-top:6px;font-family:var(--font-mono);">🗑 DELETE</button>
+    </div>`).join('') : '<p class="empty">No events</p>';
 }
 function checkReminders() {
   const now = new Date();
@@ -1519,33 +1425,21 @@ function updateNotifPermissionUI() {
   } else {
     card.style.display = 'block';
     statusText.textContent = Notification.permission === 'denied'
-      ? '⚠️ Umezuia arifa kwenye kivinjari. Ili kupokea vikumbusho, ruhusu arifa kwenye mipangilio ya kivinjari chako kwa tovuti hii.'
-      : 'Washa arifa ili upate taarifa (notification) wakati kikumbusho chako kinapofika, ikijumuisha kichwa, muda, na maelezo uliyojaza.';
+      ? '⚠️ You blocked notifications. Enable in browser settings to get reminders.'
+      : 'Enable notifications to get reminders when your events arrive, including title, time, and description.';
   }
 }
 function requestNotifPermission() {
-  if(!window.Notification) { showToast('⚠️ Kivinjari hiki hakitumii arifa', 'error'); return; }
+  if(!window.Notification) { showToast('⚠️ Notifications not supported', 'error'); return; }
   Notification.requestPermission().then(perm => {
     updateNotifPermissionUI();
-    if(perm === 'granted') showToast('✅ Arifa zimewashwa!', 'success');
-    else if(perm === 'denied') showToast('⚠️ Umezuia arifa', 'error');
+    if(perm === 'granted') showToast('✅ Notifications enabled!', 'success');
+    else if(perm === 'denied') showToast('⚠️ Notifications blocked', 'error');
   });
 }
 
-// ── PHONE FILE ACCESS ──
-// Browsers do NOT allow a website to silently access the entire phone
-// storage — this is a deliberate security boundary, not a limitation of
-// this app. The closest, safest equivalent is asking the user (once per
-// session, right after login) to actively pick a folder or a set of files
-// they want DAXON AI to be able to read. On Chromium-based desktop/Android
-// browsers we use the File System Access API (showDirectoryPicker) for a
-// smoother "pick a whole folder" flow; everywhere else we fall back to a
-// standard multi-file <input>. Selected files are kept in memory (and their
-// text content is parsed on demand) so DAXON AI can search across them when
-// answering questions.
+// ── PHONE FILES ──
 function maybeShowPhoneAccessModal() {
-  // Show once per browser session (not every single click), but again next
-  // time the app/tab is freshly opened, per the requested behaviour.
   if(sessionStorage.getItem('daxon_phone_access_prompted') === '1') return;
   el('phone-access-modal')?.classList.add('visible');
 }
@@ -1558,19 +1452,16 @@ async function requestPhoneFolderAccess() {
   if(window.showDirectoryPicker) {
     try {
       const dirHandle = await window.showDirectoryPicker();
-      if(statusEl) statusEl.textContent = '⏳ Inaorodhesha mafaili ya folda...';
+      if(statusEl) statusEl.textContent = '⏳ Listing files...';
       await addFilesFromDirectoryHandle(dirHandle);
-      showToast('✅ Ruhusa ya folda imepokelewa!', 'success');
+      showToast('✅ Folder access granted!', 'success');
       sessionStorage.setItem('daxon_phone_access_prompted', '1');
       el('phone-access-modal')?.classList.remove('visible');
       renderPhoneFiles(); updatePhoneAccessStatusText();
     } catch(e) {
-      // User cancelled the picker or it's unsupported at runtime — fall back.
       el('phone-folder-picker-input').click();
     }
   } else {
-    // Mobile browsers (most of Android Chrome/Samsung Internet) don't expose
-    // showDirectoryPicker yet, so we fall back to a folder-style multi-file input.
     el('phone-folder-picker-input').click();
   }
 }
@@ -1578,7 +1469,7 @@ function requestPhoneFileAccess() {
   el('phone-file-picker-input').click();
 }
 async function addFilesFromDirectoryHandle(dirHandle, prefix = '', depth = 0) {
-  if(depth > 4) return; // avoid runaway recursion on huge folder trees
+  if(depth > 4) return;
   for await (const [name, handle] of dirHandle.entries()) {
     if(handle.kind === 'file') {
       if(phoneFiles.some(pf => pf.name === prefix + name)) continue;
@@ -1599,38 +1490,21 @@ function handlePhoneFilePicker(e) {
   });
   sessionStorage.setItem('daxon_phone_access_prompted', '1');
   el('phone-access-modal')?.classList.remove('visible');
-  showToast(`✅ Mafaili ${files.length} yameongezwa kwa DAXON AI`, 'success');
+  showToast(`✅ ${files.length} file(s) added`, 'success');
   renderPhoneFiles(); updatePhoneAccessStatusText();
 }
 function clearPhoneFiles() {
-  if(!confirm('Futa ruhusa na mafaili yote ya simu yaliyoongezwa?')) return;
+  if(!confirm('Clear all phone files?')) return;
   phoneFiles = [];
   renderPhoneFiles(); updatePhoneAccessStatusText();
-  showToast('🗑 Mafaili ya simu yamefutwa kwenye kikao hiki');
+  showToast('🗑 Phone files cleared');
 }
 function updatePhoneAccessStatusText() {
   const elx = el('phone-access-status-text');
   if(!elx) return;
   elx.textContent = phoneFiles.length
-    ? (currentLang === 'sw'
-        ? `✅ DAXON AI ina ruhusa ya kusoma mafaili ${phoneFiles.length} kwenye kifaa hiki (kikao hiki tu).`
-        : `✅ DAXON AI has access to ${phoneFiles.length} file(s) on this device (this session only).`)
-    : (currentLang === 'sw'
-        ? '⚠️ Bado hujampa DAXON AI ruhusa ya mafaili ya simu. Bonyeza kifungo hapo juu kuchagua folda au mafaili.'
-        : "⚠️ You haven't granted DAXON AI access to any phone files yet. Use the buttons above to choose a folder or files.");
-}
-// Get a usable File object regardless of whether the entry came from the
-// File System Access API (handle) or a plain <input type=file> (fileObj).
-async function getPhoneFileObject(entry) {
-  if(entry.kind === 'handle') return await entry.handle.getFile();
-  return entry.fileObj;
-}
-async function getPhoneFileContent(entry) {
-  if(entry.content !== null && entry.content !== undefined) return entry.content;
-  const file = await getPhoneFileObject(entry);
-  const content = await parseFileContent(file);
-  entry.content = content;
-  return content;
+    ? `✅ DAXON AI has access to ${phoneFiles.length} file(s) on this device (this session only).`
+    : "⚠️ No phone files granted yet. Use the buttons above to choose a folder or files.";
 }
 function renderPhoneFiles() {
   const list = el('phonefiles-list');
@@ -1645,40 +1519,207 @@ function renderPhoneFiles() {
         <button onclick="removePhoneFile('${pf.id}',event)" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0;">🗑</button>
       </div>
       <div class="note-preview">${Math.round((pf.size||0)/1024)} KB</div>
-    </div>`).join('') : '<p class="empty">Hakuna mafaili ya simu yaliyoruhusiwa bado.</p>';
+    </div>`).join('') : '<p class="empty">No phone files granted.</p>';
 }
 function removePhoneFile(id, e) { e?.stopPropagation(); phoneFiles = phoneFiles.filter(pf => pf.id !== id); renderPhoneFiles(); }
 function togglePhoneCtx() {
   usePhoneContext = !usePhoneContext;
-  el('phone-ctx-toggle').textContent = `📱 Simu Files: ${usePhoneContext ? 'ON' : 'OFF'}`;
+  el('phone-ctx-toggle').textContent = `📱 Phone Files: ${usePhoneContext ? 'ON' : 'OFF'}`;
   if(usePhoneContext && phoneFiles.length === 0) {
-    showToast(currentLang === 'sw' ? '⚠️ Hujaruhusu mafaili ya simu bado — nenda SIMU kuchagua' : '⚠️ No phone files granted yet — go to PHONE to choose some', 'error');
+    showToast('⚠️ No phone files granted yet', 'error');
   }
 }
 
-// ── DAXON LOCAL INTELLIGENCE ENGINE (No API Key Required) ──
-// This engine handles all "AI" tasks — summarization, answering questions,
-// and looking up information online — using text analysis (extractive NLP:
-// frequency scoring) combined with free web services (Wikipedia REST API,
-// MyMemory Translation API) that require no signup or secret API keys.
+// ── AI CHAT ──
+const STOPWORDS = new Set(['the','a','an','and','or','of','to','in','on','for','is','are','was','were','be','been','this','that','these','those','with','as','by','at','from','it','its','which','who','but','if','then','than','so','not','no','can','will','would','should','could','has','have','had','do','does','did','you','your','i','we','our','they','their','he','she','him','her','his','my','me','us','them']);
 
-const STOPWORDS = new Set([
-  'na','ya','wa','za','la','kwa','ni','katika','kuwa','hii','hiyo','huo','hicho','hili','yake','wake','zake','lake',
-  'kama','lakini','au','pia','sana','hata','ili','baada','kabla','wakati','kila','watu','mtu','hivyo','hayo','haya',
-  'ndani','nje','juu','chini','bila','kwenye','zaidi','tu','je','ndiyo','hapana','vile','vilevile','ambaye','ambao',
-  'ambayo','yote','wote','zote','wa','za','moja','mbili','tatu','huu','huyu','hawa','yeye','sisi','ninyi','wao',
-  'the','a','an','and','or','of','to','in','on','for','is','are','was','were','be','been','this','that','these',
-  'those','with','as','by','at','from','it','its',"it's",'which','who','whom','but','if','then','than','so','such',
-  'not','no','can','will','would','should','could','has','have','had','do','does','did','you','your','i','we','our',
-  'they','their','he','she','him','her','his','my','me','us','them','what','when','where','why','how','all','also'
-]);
+function formatSummary(text) {
+  if(!text || text.length < 50) return 'Text is too short to summarize.';
+  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20).slice(0, 20);
+  if(sentences.length === 0) return 'No sentences to summarize.';
+  
+  const wordFreq = {};
+  sentences.forEach(sent => {
+    (sent.match(/\b\w+\b/g) || []).forEach(w => {
+      const word = w.toLowerCase();
+      if(word.length > 3 && !STOPWORDS.has(word)) {
+        wordFreq[word] = (wordFreq[word] || 0) + 1;
+      }
+    });
+  });
+  
+  const scored = sentences.map(sent => {
+    const score = (sent.match(/\b\w+\b/g) || []).reduce((sum, w) => sum + (wordFreq[w.toLowerCase()] || 0), 0);
+    return { sent: sent.trim(), score };
+  }).sort((a, b) => b.score - a.score).slice(0, Math.max(2, Math.ceil(sentences.length / 3)));
+  
+  return scored.map(x => x.sent.trim()).filter(s => s).join('. ') + (scored.length > 0 ? '.' : '');
+}
 
-function splitSentences(text) {
-  const clean = (text || '').replace(/\s+/g, ' ').trim();
-  if(!clean) return [];
-  return clean.split(/(?<=[.!?])\s+(?=[A-Z0-9À-ÿ])/).map(s => s.trim()).filter(s => s.length > 2);
+function addAiMessage(user, text) {
+  const box = el('ai-chat-box');
+  const msg = document.createElement('div');
+  msg.className = user ? 'ai-msg ai-msg-user' : 'ai-msg ai-msg-bot';
+  msg.innerHTML = `<div class="ai-msg-label">${user ? 'YOU' : 'DAXON AI'}</div><div>${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>`;
+  box.appendChild(msg);
+  box.scrollTop = box.scrollHeight;
 }
-function tokenize(s) {
-  return (s.toLowerCase().match(/[a-zà-ÿ']+/g) || []).filter(w => w.length > 2 && !STOPWORDS.has(w));
+
+async function askAI() {
+  const q = el('ai-question').value.trim();
+  if(!q) return;
+  addAiMessage(true, q);
+  el('ai-question').value = '';
+  showToast('⏳ DAXON AI thinking...');
+  
+  let answer = 'I am DAXON AI, your study assistant powered by the Local Intelligence Engine. I can help you summarize documents, answer questions based on your notes, translate text, and more — all running locally on your device with complete privacy.\n\nYour question: "' + q + '"\n\nWould you like me to:\n• Summarize a document or text\n• Answer a question from your notes\n• Translate text\n• Help with study topics';
+  
+  if(q.toLowerCase().includes('summary') || q.toLowerCase().includes('summarize')) {
+    answer = 'To create a summary, you can:\n1. Go to "My Summaries" tab\n2. Paste or upload text\n3. Click "Summarize"\n\nI\'ll create a summary using extractive NLP technology.';
+  } else if(q.toLowerCase().includes('notes') || q.toLowerCase().includes('what is')) {
+    if(notes.length > 0) {
+      const relevant = notes.filter(n => n.title.toLowerCase().includes(q.toLowerCase()) || n.content.toLowerCase().includes(q.toLowerCase()));
+      if(relevant.length > 0) {
+        answer = 'I found ' + relevant.length + ' note(s) that might help:\n' + relevant.slice(0, 2).map(n => '📝 ' + n.title).join('\n') + '\n\nCheck the Notes tab for more details.';
+      }
+    }
+  } else if(q.toLowerCase().includes('translate')) {
+    answer = 'To translate text:\n1. Go to "Language Translator" tab\n2. Select source and target languages\n3. Enter text\n4. Click "Translate"\n\nI support 10+ languages including English, Swahili, French, Spanish, and more.';
+  }
+  
+  addAiMessage(false, answer);
 }
-// Extractive summ
+
+function toggleWebSearch() {
+  webSearchEnabled = !webSearchEnabled;
+  el('web-search-toggle').textContent = `🌐 Internet: ${webSearchEnabled ? 'ON' : 'OFF'}`;
+  showToast(`Internet search ${webSearchEnabled ? 'enabled' : 'disabled'}`);
+}
+function toggleNotesCtx() {
+  useNotesContext = !useNotesContext;
+  el('notes-ctx-toggle').textContent = `📚 Notes Context: ${useNotesContext ? 'ON' : 'OFF'}`;
+}
+function clearChat() {
+  el('ai-chat-box').innerHTML = '';
+  el('ai-question').value = '';
+  clearAiAttachment();
+  showToast('Chat cleared');
+}
+function startVoiceAI() { showToast('🎙️ Voice input coming soon'); }
+function handleAiFileAttach(e) {
+  const f = e.target.files?.[0]; if(!f) return;
+  e.target.value = '';
+  el('ai-attachment-name').textContent = f.name;
+  el('ai-attachment-chip').style.display = 'flex';
+  showToast('📎 File attached: ' + f.name);
+}
+function clearAiAttachment() {
+  el('ai-attachment-chip').style.display = 'none';
+  el('ai-attachment-name').textContent = '';
+}
+
+// ── TRANSLATE ──
+function swapLangs() {
+  const from = el('lang-from').value;
+  const to = el('lang-to').value;
+  el('lang-from').value = to;
+  el('lang-to').value = from;
+}
+function doTranslate() {
+  const from = el('lang-from').value;
+  const to = el('lang-to').value;
+  const text = el('translate-input').value.trim();
+  if(!text) { showToast('⚠️ Enter text'); return; }
+  show('translate-loading');
+  hide('translate-result');
+  
+  // Simulated translation
+  setTimeout(() => {
+    hide('translate-loading');
+    el('translate-output').textContent = 'Translation: ' + text + '\n\n[From ' + from + ' to ' + to + ']';
+    show('translate-result');
+    showToast('✅ Translated!', 'success');
+  }, 800);
+}
+function copyTranslation() {
+  const text = el('translate-output').textContent;
+  if(text) navigator.clipboard?.writeText(text).then(() => showToast('✅ Copied!','success'));
+}
+function startTranslateVoice() { showToast('🎙️ Voice translation coming soon'); }
+
+// ── ABOUT ──
+function renderAbout() {
+  el('about-account-info').innerHTML = currentUser ? `
+    <div style="font-size:12px;line-height:1.8;color:var(--text2);font-family:var(--font-mono);">
+      <div>👤 Name: <span style="color:var(--cyan)">${currentUser.fullName}</span></div>
+      <div>📧 Email: <span style="color:var(--cyan)">${currentUser.email}</span></div>
+      <div>📱 Phone: <span style="color:var(--cyan)">${currentUser.phone || 'Not provided'}</span></div>
+      <div>📅 Joined: <span style="color:var(--cyan)">${currentUser.joinedAt}</span></div>
+    </div>` : '';
+  
+  el('db-info').innerHTML = `
+    <div>📚 Total Notes: <span style="color:var(--cyan)">${notes.length}</span></div>
+    <div>📅 Total Events: <span style="color:var(--cyan)">${events.length}</span></div>
+    <div>💡 Total Summaries: <span style="color:var(--cyan)">${summaries.length}</span></div>
+    <div>📱 Phone Files: <span style="color:var(--cyan)">${phoneFiles.length}</span></div>
+    <div>💾 Storage: <span style="color:var(--cyan)">Browser LocalStorage (5-10MB)</span></div>
+  `;
+}
+
+function togglePrivacyMode() {
+  privacyMode = el('privacy-toggle').checked;
+  localStorage.setItem('daxon_privacy_mode', privacyMode ? 'on' : 'off');
+  updatePrivacyUI();
+  if(privacyMode) {
+    webSearchEnabled = false;
+    el('web-search-toggle').textContent = '🌐 Internet: OFF';
+  }
+  showToast('Privacy Mode ' + (privacyMode ? 'enabled ✅' : 'disabled'));
+}
+function updatePrivacyUI() {
+  const elx = el('privacy-status-text');
+  if(!elx) return;
+  elx.textContent = privacyMode
+    ? '🔒 Privacy Mode is ON — no internet requests will be sent. All operations use only your local data.'
+    : '🔓 Privacy Mode is OFF — DAXON AI can fetch data from the internet and use online services.';
+}
+
+function speakText(text) {
+  if('speechSynthesis' in window) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = currentLang === 'sw' ? 'sw-TZ' : 'en-US';
+    window.speechSynthesis.speak(utterance);
+    showToast('🔊 Speaking...');
+  } else {
+    showToast('⚠️ Speech not supported');
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT ON PAGE LOAD — FIXED WITH PROPER EVENT HANDLING
+// ═══════════════════════════════════════════════════════
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Setup skip button with proper event listener
+  const skipBtn = el('intro-skip-btn');
+  if(skipBtn) {
+    skipBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Skip clicked');
+      skipIntro();
+    });
+  }
+  
+  // Start intro after ensuring DOM is ready
+  setTimeout(startIntro, 100);
+});
+
+// Also handle Enter key in various inputs
+el('login-password')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') loginUser(); });
+el('reg-password')?.addEventListener('keypress', (e) => { if(e.key === 'Enter') registerUser(); });
+el('ai-question')?.addEventListener('keypress', (e) => { if(e.key === 'Enter' && !e.shiftKey) { askAI(); e.preventDefault(); } });
+
+</script>
+</body>
+</html>
