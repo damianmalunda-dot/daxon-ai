@@ -1,0 +1,68 @@
+# Dependency directories (never commit these)
+node_modules/
+jspm_packages/
+
+# Environment variables (contains database passwords, API keys)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Directory for instrumented code coverage downloads
+coverage
+*.lcov
+
+# Make/Build output (If using TypeScript/Babel)
+dist/
+build/
+
+# IDE/Editor specific settings
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+
+# MkDocs build directory
+site/
+
+# MkDocs cache (used by plugins/themes like mkdocs-material)
+.mkdocs/
+
+# Python caching
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Development environment configurations
+.pytest_cache/
+.mypy_cache/
