@@ -1,0 +1,1254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+    />
+    <title>DAXON AI — Ultimate Study Platform</title>
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#03060e" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="DAXON AI" />
+    <link rel="icon" href="./icon-192.png" type="image/png" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
+    <link rel="stylesheet" href="./css/index.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <!-- ═══════════════════════════════════════
+     ANIMATED 10-SECOND INTRO
+═══════════════════════════════════════ -->
+    <div id="intro-screen">
+      <div class="intro-bg-grid"></div>
+      <div class="intro-ring"></div>
+      <div class="intro-ring"></div>
+      <div class="intro-ring"></div>
+      <div class="intro-center">
+        <div class="intro-logo-wrap">
+          <div class="intro-hex">
+            <div class="intro-hex-inner">🚀</div>
+          </div>
+        </div>
+        <div class="intro-title-main">DAXON</div>
+        <div class="intro-sub">ULTIMATE STUDY PLATFORM v3.0</div>
+        <p class="intro-tagline">
+          AI-Powered • Smart Notes • Document Reader • Camera OCR • Translation
+        </p>
+        <div class="intro-feature-pills">
+          <div class="pill" style="animation-delay: 0.2s">
+            📄 Document Reader
+          </div>
+          <div class="pill" style="animation-delay: 0.4s">🤖 AI Tutor</div>
+          <div class="pill" style="animation-delay: 0.6s">📷 Camera OCR</div>
+          <div class="pill" style="animation-delay: 0.8s">🌐 Translation</div>
+          <div class="pill" style="animation-delay: 1s">📅 Schedule</div>
+          <div class="pill" style="animation-delay: 1.2s">📝 Summaries</div>
+        </div>
+        <div class="intro-progress-wrap">
+          <div class="intro-progress-bar">
+            <div class="intro-progress-fill" id="intro-progress"></div>
+          </div>
+          <div class="intro-timer" id="intro-timer">10s</div>
+        </div>
+        <button class="intro-skip" id="intro-skip-btn">SKIP →</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+     AUTH SCREEN
+═══════════════════════════════════════ -->
+    <div id="auth-screen" style="display: none">
+      <div class="auth-card">
+        <div class="auth-logo">
+          <span class="logo-icon">🚀</span>
+          <h1>DAXON</h1>
+          <p>ULTIMATE STUDY PLATFORM v3.0</p>
+        </div>
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="switchAuthTab('login')">
+            LOGIN
+          </button>
+          <button class="auth-tab" onclick="switchAuthTab('register')">
+            REGISTER
+          </button>
+        </div>
+        <div id="login-form">
+          <div class="field">
+            <label>EMAIL</label
+            ><input
+              type="email"
+              id="login-email"
+              placeholder="your@email.com"
+            />
+          </div>
+          <div class="field">
+            <label>PASSWORD</label
+            ><input
+              type="password"
+              id="login-password"
+              placeholder="••••••••"
+            />
+          </div>
+          <button class="auth-btn" onclick="loginUser()">ENTER SYSTEM →</button>
+        </div>
+        <div id="register-form" style="display: none">
+          <div class="field">
+            <label>FULL NAME</label
+            ><input type="text" id="reg-name" placeholder="Your Name" />
+          </div>
+          <div class="field">
+            <label>EMAIL</label
+            ><input type="email" id="reg-email" placeholder="your@email.com" />
+          </div>
+          <div class="field">
+            <label>PHONE</label
+            ><input type="tel" id="reg-phone" placeholder="+255..." />
+          </div>
+          <div class="field">
+            <label>PASSWORD</label
+            ><input
+              type="password"
+              id="reg-password"
+              placeholder="Min 6 chars"
+            />
+          </div>
+          <button class="auth-btn" onclick="registerUser()">
+            CREATE ACCOUNT
+          </button>
+        </div>
+        <div id="auth-error" class="auth-error"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+     PHONE FILE ACCESS MODAL
+═══════════════════════════════════════ -->
+    <div id="phone-access-modal">
+      <div class="pam-card">
+        <div class="pam-icon">📱</div>
+        <div class="pam-title">FILE ACCESS REQUEST</div>
+        <div class="pam-desc">
+          DAXON AI requests permission to access files on your device (PDF,
+          Word, images, etc.) to read and answer questions about them. Choose a
+          folder or files you want DAXON AI to read.
+        </div>
+        <div class="pam-btns">
+          <button
+            class="btn btn-primary btn-full"
+            onclick="requestPhoneFolderAccess()"
+          >
+            📁 ALLOW — CHOOSE FOLDER
+          </button>
+          <button class="btn btn-full" onclick="requestPhoneFileAccess()">
+            📎 CHOOSE SPECIFIC FILES
+          </button>
+          <button class="btn btn-full btn-danger" onclick="skipPhoneAccess()">
+            ✕ SKIP FOR NOW
+          </button>
+        </div>
+        <div class="pam-status" id="pam-status"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+     MAIN APP
+═══════════════════════════════════════ -->
+    <div id="app">
+      <!-- TOPBAR -->
+      <div id="topbar">
+        <div class="top-logo">
+          <span style="font-size: 20px">🚀</span>
+          <span>DAXON</span>
+        </div>
+        <div class="top-right">
+          <span class="top-user" id="topbar-user">User</span>
+          <div id="lang-switch" style="display: flex; gap: 4px">
+            <button
+              class="btn btn-sm"
+              id="lang-btn-sw"
+              onclick="applyLanguage('sw')"
+              style="padding: 6px 10px"
+            >
+              🇹🇿 SW
+            </button>
+            <button
+              class="btn btn-sm"
+              id="lang-btn-en"
+              onclick="applyLanguage('en')"
+              style="padding: 6px 10px"
+            >
+              🇬🇧 EN
+            </button>
+          </div>
+          <button class="logout-btn" onclick="logoutUser()">LOGOUT</button>
+        </div>
+      </div>
+
+      <!-- LAYOUT -->
+      <div id="layout">
+        <!-- SIDEBAR -->
+        <div id="sidebar">
+          <button
+            class="nav-btn active"
+            data-page="dashboard"
+            onclick="goTo('dashboard')"
+          >
+            <span class="nav-icon">📊</span><span class="nav-label">DASH</span>
+          </button>
+          <button class="nav-btn" data-page="notes" onclick="goTo('notes')">
+            <span class="nav-icon">📝</span><span class="nav-label">NOTES</span>
+          </button>
+          <button class="nav-btn" data-page="reader" onclick="goTo('reader')">
+            <span class="nav-icon">📖</span
+            ><span class="nav-label">READER</span>
+          </button>
+          <button class="nav-btn" data-page="scanner" onclick="goTo('scanner')">
+            <span class="nav-icon">📷</span><span class="nav-label">SCAN</span>
+          </button>
+          <button
+            class="nav-btn"
+            data-page="summaries"
+            onclick="goTo('summaries')"
+          >
+            <span class="nav-icon">💡</span><span class="nav-label">SUMM.</span>
+          </button>
+          <button
+            class="nav-btn"
+            data-page="schedule"
+            onclick="goTo('schedule')"
+          >
+            <span class="nav-icon">📅</span><span class="nav-label">SCHED</span>
+          </button>
+          <button
+            class="nav-btn"
+            data-page="phonefiles"
+            onclick="goTo('phonefiles')"
+          >
+            <span class="nav-icon">📱</span><span class="nav-label">PHONE</span>
+          </button>
+          <button
+            class="nav-btn"
+            data-page="daxon-ai"
+            onclick="goTo('daxon-ai')"
+          >
+            <span class="nav-icon">🤖</span><span class="nav-label">AI</span>
+          </button>
+          <button
+            class="nav-btn"
+            data-page="translate"
+            onclick="goTo('translate')"
+          >
+            <span class="nav-icon">🌐</span><span class="nav-label">TRANS</span>
+          </button>
+          <button class="nav-btn" data-page="about" onclick="goTo('about')">
+            <span class="nav-icon">ℹ️</span><span class="nav-label">INFO</span>
+          </button>
+        </div>
+
+        <!-- CONTENT -->
+        <div id="content">
+          <!-- ── DASHBOARD ── -->
+          <div id="page-dashboard" class="page active">
+            <div class="page-title">
+              <span class="dot"></span><span>DASHBOARD</span>
+            </div>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 12px;
+                margin-bottom: 18px;
+              "
+            >
+              <div class="stat-card">
+                <div class="stat-icon">📝</div>
+                <div class="stat-val" id="stat-notes">0</div>
+                <div class="stat-lbl">NOTES</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">📅</div>
+                <div class="stat-val" id="stat-events">0</div>
+                <div class="stat-lbl">EVENTS</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon">💡</div>
+                <div class="stat-val" id="stat-summaries">0</div>
+                <div class="stat-lbl">SUMM.</div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">📚 RECENT NOTES</div>
+              <div id="dash-notes-list"></div>
+            </div>
+            <div class="card">
+              <div class="card-title">📅 TODAY'S SCHEDULE</div>
+              <div id="dash-schedule-list"></div>
+            </div>
+          </div>
+
+          <!-- ── NOTES ── -->
+          <div id="page-notes" class="page">
+            <div class="page-title">
+              <span class="dot"></span><span>NOTES MANAGER</span>
+            </div>
+            <div id="notes-list-view">
+              <div class="card">
+                <input
+                  type="text"
+                  id="notes-search"
+                  placeholder="Search notes..."
+                  onkeyup="renderNotes()"
+                  style="margin-bottom: 12px"
+                />
+                <div
+                  class="import-zone"
+                  ondrop="dropFile(event)"
+                  ondragover="dragOver(event)"
+                  ondragleave="dragLeave(event)"
+                  onclick="triggerFileImport()"
+                >
+                  <div class="import-icon">📂</div>
+                  <p>DROP FILES OR CLICK TO IMPORT</p>
+                  <small
+                    >PDF • DOCX • PPTX • XLSX • TXT • JSON • CSV • Images</small
+                  >
+                </div>
+                <button
+                  class="btn btn-full btn-primary"
+                  onclick="openNoteEditor()"
+                >
+                  <span>➕ NEW NOTE</span>
+                </button>
+              </div>
+              <div id="notes-list"></div>
+            </div>
+            <div id="note-editor" style="display: none">
+              <div class="page-title">
+                <span class="dot"></span><span>WRITE NOTE</span>
+              </div>
+              <div class="card">
+                <div class="field">
+                  <label>TITLE</label
+                  ><input
+                    type="text"
+                    id="note-title-input"
+                    placeholder="Note title..."
+                  />
+                </div>
+                <div class="field">
+                  <label>CONTENT</label
+                  ><textarea
+                    id="note-content-input"
+                    placeholder="Write here..."
+                    rows="10"
+                  ></textarea>
+                </div>
+                <div style="display: flex; gap: 10px">
+                  <button class="btn btn-success" onclick="saveNote()">
+                    <span>💾 SAVE</span>
+                  </button>
+                  <button class="btn btn-danger" onclick="closeNoteEditor()">
+                    <span>✕ CLOSE</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div id="note-reader-inline" style="display: none">
+              <div class="page-title">
+                <span class="dot"></span
+                ><span id="reader-title-inline">NOTE</span>
+              </div>
+              <div class="card">
+                <div
+                  id="reader-content-inline"
+                  style="
+                    line-height: 1.8;
+                    color: var(--text);
+                    white-space: pre-wrap;
+                    max-height: 380px;
+                    overflow-y: auto;
+                    font-size: 13px;
+                  "
+                ></div>
+                <div
+                  style="
+                    color: var(--text3);
+                    font-size: 10px;
+                    margin: 10px 0;
+                    font-family: var(--font-mono);
+                  "
+                  id="reader-date-inline"
+                ></div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                  <button class="btn btn-primary" onclick="editCurrentNote()">
+                    <span>✎ EDIT</span>
+                  </button>
+                  <button
+                    class="btn btn-purple"
+                    onclick="summarizeCurrentNote()"
+                  >
+                    💡 AI SUMMARIZE
+                  </button>
+                  <button class="btn" onclick="speakNote()">
+                    <span>🔊 READ ALOUD</span>
+                  </button>
+                  <button class="btn btn-danger" onclick="closeNoteReader()">
+                    <span>✕ CLOSE</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── DOCUMENT READER ── -->
+          <div id="page-reader" class="page">
+            <div class="page-title">
+              <span class="dot"></span>DOCUMENT READER
+            </div>
+            <div class="card">
+              <div class="card-title">📤 UPLOAD ANY DOCUMENT</div>
+              <div
+                class="import-zone"
+                onclick="document.getElementById('reader-file-input').click()"
+                ondrop="dropReaderFile(event)"
+                ondragover="dragOver(event)"
+                ondragleave="dragLeave(event)"
+              >
+                <div class="import-icon">📄</div>
+                <p>CLICK OR DROP HERE</p>
+                <small
+                  >PDF • DOCX • PPTX • XLSX • TXT • CSV • JSON • MD •
+                  Images</small
+                >
+              </div>
+              <input
+                type="file"
+                id="reader-file-input"
+                style="display: none"
+                accept=".pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.txt,.csv,.json,.md,.png,.jpg,.jpeg,.webp"
+                onchange="readDocumentFile(event)"
+              />
+            </div>
+            <div id="reader-panel" style="display: none">
+              <div class="card">
+                <div class="reader-file-info" id="reader-file-info">
+                  📄 No file
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                    margin-bottom: 12px;
+                  "
+                >
+                  <button class="btn btn-sm" onclick="speakReaderContent()">
+                    <span>🔊 READ ALOUD</span>
+                  </button>
+                  <button
+                    class="btn btn-sm btn-purple"
+                    onclick="aiSummarizeReader()"
+                  >
+                    💡 AI SUMMARIZE
+                  </button>
+                  <button
+                    class="btn btn-sm btn-success"
+                    onclick="saveReaderAsNote()"
+                  >
+                    <span>💾 SAVE AS NOTE</span>
+                  </button>
+                  <button
+                    class="btn btn-sm btn-danger"
+                    onclick="closeReaderPanel()"
+                  >
+                    <span>✕ CLOSE</span>
+                  </button>
+                </div>
+                <div id="doc-reader-content">Loading...</div>
+              </div>
+              <div id="reader-summary-box" style="display: none" class="card">
+                <div class="card-title">💡 AI SUMMARY</div>
+                <div
+                  id="reader-summary-text"
+                  style="line-height: 1.8; color: var(--text); font-size: 13px"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── SCANNER / CAMERA ── -->
+          <div id="page-scanner" class="page">
+            <div class="page-title">
+              <span class="dot"></span>SCANNER & CAMERA
+            </div>
+            <div class="card">
+              <div class="card-title">📷 CAMERA (FULL ACCESS)</div>
+              <div
+                style="
+                  display: flex;
+                  gap: 10px;
+                  flex-wrap: wrap;
+                  margin-bottom: 12px;
+                "
+              >
+                <button
+                  class="btn btn-primary"
+                  id="start-cam-btn"
+                  onclick="startCamera()"
+                >
+                  <span>📷 START CAMERA</span>
+                </button>
+                <button
+                  class="btn"
+                  id="switch-cam-btn"
+                  onclick="switchCamera()"
+                  style="display: none"
+                >
+                  <span>🔄 SWITCH</span>
+                </button>
+                <button
+                  class="btn btn-success"
+                  id="snap-btn"
+                  onclick="snapPhoto()"
+                  style="display: none"
+                >
+                  <span>📸 TAKE PHOTO</span>
+                </button>
+                <button
+                  class="btn btn-danger"
+                  id="stop-cam-btn"
+                  onclick="stopCamera()"
+                  style="display: none"
+                >
+                  <span>⏹ STOP</span>
+                </button>
+              </div>
+              <video id="camera-stream" autoplay playsinline muted></video>
+              <canvas id="capture-canvas"></canvas>
+              <div
+                id="cam-ocr-status"
+                style="
+                  color: var(--cyan);
+                  font-family: var(--font-mono);
+                  font-size: 11px;
+                  margin-top: 8px;
+                "
+              ></div>
+            </div>
+            <div class="card">
+              <div class="card-title">📁 UPLOAD IMAGE / FILE</div>
+              <div
+                class="import-zone"
+                onclick="document.getElementById('scan-file-input').click()"
+              >
+                <div class="import-icon">🔍</div>
+                <p>CLICK TO UPLOAD IMAGE OR FILE</p>
+                <small>PNG • JPG • JPEG • WEBP (OCR Text Extraction)</small>
+              </div>
+              <input
+                type="file"
+                id="scan-file-input"
+                style="display: none"
+                accept="image/*,.pdf,.txt"
+                onchange="handleScanFile(event)"
+              />
+            </div>
+            <div class="card">
+              <div class="card-title">📝 SCAN RESULT</div>
+              <textarea
+                id="scan-text-result"
+                placeholder="OCR/scan results will appear here..."
+                rows="7"
+              ></textarea>
+              <div
+                style="
+                  display: flex;
+                  gap: 10px;
+                  flex-wrap: wrap;
+                  margin-top: 10px;
+                "
+              >
+                <button
+                  class="btn btn-purple btn-sm"
+                  onclick="aiSummarizeScan()"
+                >
+                  💡 SUMMARIZE
+                </button>
+                <button
+                  class="btn btn-success btn-sm"
+                  onclick="saveScanAsNote()"
+                >
+                  <span>💾 SAVE NOTE</span>
+                </button>
+                <button class="btn btn-sm" onclick="speakScan()">
+                  <span>🔊 READ</span>
+                </button>
+              </div>
+              <div
+                id="scan-summary"
+                style="display: none; margin-top: 12px"
+                class="card"
+              >
+                <div class="card-title">💡 AI SUMMARY</div>
+                <div
+                  id="scan-summary-text"
+                  style="line-height: 1.8; color: var(--text); font-size: 13px"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── MY SUMMARIES ── -->
+          <div id="page-summaries" class="page">
+            <div class="page-title"><span class="dot"></span>MY SUMMARIES</div>
+            <div class="card">
+              <div class="card-title">📝 NEW SUMMARY (MANUAL)</div>
+              <div class="field">
+                <label>WRITE TEXT</label
+                ><textarea
+                  id="manual-sum-input"
+                  placeholder="Paste your text here... AI will summarize it."
+                  rows="5"
+                ></textarea>
+              </div>
+              <div style="display: flex; gap: 10px">
+                <button class="btn btn-primary" onclick="createManualSummary()">
+                  <span>💡 SUMMARIZE</span>
+                </button>
+                <button
+                  class="btn"
+                  onclick="document.getElementById('sum-file-input').click()"
+                >
+                  <span>🎙️ VOICE</span>
+                </button>
+              </div>
+              <input
+                type="file"
+                id="sum-file-input"
+                style="display: none"
+                onchange="handleSumFile(event)"
+              />
+            </div>
+            <div id="sum-result-box" style="display: none" class="card">
+              <div class="card-title">✨ AI SUMMARY</div>
+              <div
+                id="sum-result-text"
+                style="line-height: 1.8; color: var(--text); font-size: 13px"
+              ></div>
+              <button
+                class="btn btn-success btn-sm"
+                style="margin-top: 12px"
+                onclick="saveSummaryToList()"
+              >
+                <span>💾 SAVE SUMMARY</span>
+              </button>
+            </div>
+            <div class="page-title" style="margin-top: 18px; font-size: 11px">
+              <span class="dot"></span><span>SAVED SUMMARIES</span>
+            </div>
+            <div id="summaries-list"></div>
+          </div>
+
+          <!-- ── SCHEDULE ── -->
+          <div id="page-schedule" class="page">
+            <div class="page-title">
+              <span class="dot"></span><span>SCHEDULE & REMINDERS</span>
+            </div>
+            <div class="card" id="notif-permission-card" style="display: none">
+              <div class="card-title">🔔 NOTIFICATIONS</div>
+              <div
+                style="
+                  color: var(--text2);
+                  font-size: 11px;
+                  font-family: var(--font-mono);
+                  margin-bottom: 10px;
+                "
+                id="notif-status-text"
+              ></div>
+              <button
+                class="btn btn-primary btn-full btn-sm"
+                onclick="requestNotifPermission()"
+              >
+                <span>🔔 ENABLE NOTIFICATIONS</span>
+              </button>
+            </div>
+            <div class="card">
+              <div class="card-title">➕ ADD EVENT</div>
+              <div class="field">
+                <label>TITLE</label
+                ><input
+                  type="text"
+                  id="event-title"
+                  placeholder="e.g. Math Class"
+                />
+              </div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr;
+                  gap: 10px;
+                  margin-bottom: 12px;
+                "
+              >
+                <div class="field">
+                  <label>DATE</label><input type="date" id="event-date" />
+                </div>
+                <div class="field">
+                  <label>TIME</label><input type="time" id="event-time" />
+                </div>
+              </div>
+              <div class="field">
+                <label>END TIME</label><input type="time" id="event-end-time" />
+              </div>
+              <div class="field">
+                <label>DESCRIPTION (OPTIONAL)</label
+                ><textarea
+                  id="event-desc"
+                  rows="2"
+                  placeholder="More details about this event..."
+                ></textarea>
+              </div>
+              <div
+                class="field"
+                style="display: flex; align-items: center; gap: 10px"
+              >
+                <input
+                  type="checkbox"
+                  id="event-reminder"
+                  style="width: auto; cursor: pointer"
+                  checked
+                />
+                <label
+                  style="
+                    font-family: var(--font-mono);
+                    font-size: 10px;
+                    color: var(--blue);
+                    cursor: pointer;
+                  "
+                  for="event-reminder"
+                  >⏰ SET REMINDER (NOTIFICATION)</label
+                >
+              </div>
+              <button class="btn btn-success btn-full" onclick="addEvent()">
+                <span>✓ ADD EVENT</span>
+              </button>
+            </div>
+            <div class="card">
+              <div class="card-title">📅 UPCOMING EVENTS</div>
+              <div id="events-list"></div>
+            </div>
+          </div>
+
+          <!-- ── PHONE FILES ── -->
+          <div id="page-phonefiles" class="page">
+            <div class="page-title">
+              <span class="dot"></span><span>PHONE FILES</span>
+            </div>
+            <div class="card">
+              <div class="card-title">📱 FILE ACCESS</div>
+              <div
+                style="
+                  color: var(--text2);
+                  font-size: 11px;
+                  font-family: var(--font-mono);
+                  line-height: 1.8;
+                  margin-bottom: 12px;
+                "
+                id="phone-access-status-text"
+              ></div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                <button
+                  class="btn btn-primary btn-sm"
+                  onclick="requestPhoneFolderAccess()"
+                >
+                  <span>📁 CHOOSE FOLDER</span>
+                </button>
+                <button class="btn btn-sm" onclick="requestPhoneFileAccess()">
+                  <span>📎 ADD FILES</span>
+                </button>
+                <button
+                  class="btn btn-sm btn-danger"
+                  onclick="clearPhoneFiles()"
+                >
+                  <span>🗑 CLEAR ALL</span>
+                </button>
+              </div>
+            </div>
+            <div class="card">
+              <input
+                type="text"
+                id="phonefiles-search"
+                placeholder="Search files..."
+                onkeyup="renderPhoneFiles()"
+                style="margin-bottom: 12px"
+              />
+              <div id="phonefiles-list"></div>
+            </div>
+          </div>
+
+          <!-- ── DAXON AI ── -->
+          <div id="page-daxon-ai" class="page">
+            <div class="page-title">
+              <span class="dot"></span>DAXON AI ASSISTANT
+            </div>
+            <div class="card">
+              <div id="ai-chat-box"></div>
+              <div
+                id="ai-attachment-chip"
+                style="
+                  display: none;
+                  align-items: center;
+                  gap: 8px;
+                  background: rgba(0, 229, 255, 0.06);
+                  border: 1px solid var(--border2);
+                  border-radius: 10px;
+                  padding: 8px 12px;
+                  margin-top: 10px;
+                "
+              >
+                <span
+                  id="ai-attachment-name"
+                  style="
+                    font-family: var(--font-mono);
+                    font-size: 10px;
+                    color: var(--cyan);
+                    flex: 1;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                  "
+                ></span>
+                <button
+                  onclick="clearAiAttachment()"
+                  style="
+                    background: none;
+                    border: none;
+                    color: var(--red);
+                    cursor: pointer;
+                    font-size: 13px;
+                  "
+                >
+                  ✖
+                </button>
+              </div>
+              <div style="display: flex; gap: 8px; margin-top: 10px">
+                <textarea
+                  id="ai-question"
+                  placeholder="Ask any question... (Swahili or English)"
+                  rows="2"
+                  style="flex: 1"
+                ></textarea>
+                <div style="display: flex; flex-direction: column; gap: 6px">
+                  <button class="btn btn-primary btn-sm" onclick="askAI()">
+                    <span>🤖 ASK</span>
+                  </button>
+                  <button class="btn btn-sm" onclick="startVoiceAI()">
+                    🎙️
+                  </button>
+                </div>
+              </div>
+              <div
+                style="
+                  display: flex;
+                  gap: 8px;
+                  flex-wrap: wrap;
+                  margin-top: 10px;
+                "
+              >
+                <button
+                  class="btn btn-sm"
+                  onclick="document.getElementById('ai-file-input').click()"
+                >
+                  <span>📎 UPLOAD FILE/IMAGE</span>
+                </button>
+                <button
+                  class="btn btn-sm"
+                  onclick="toggleWebSearch()"
+                  id="web-search-toggle"
+                >
+                  🌐 Internet: OFF
+                </button>
+                <button
+                  class="btn btn-sm"
+                  onclick="toggleNotesCtx()"
+                  id="notes-ctx-toggle"
+                >
+                  📚 Notes Context: ON
+                </button>
+                <button
+                  class="btn btn-sm"
+                  onclick="togglePhoneCtx()"
+                  id="phone-ctx-toggle"
+                >
+                  📱 Phone Files: OFF
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="clearChat()">
+                  <span>🗑 CLEAR CHAT</span>
+                </button>
+              </div>
+              <input
+                type="file"
+                id="ai-file-input"
+                style="display: none"
+                accept=".txt,.md,.csv,.json,.pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.png,.jpg,.jpeg,.webp"
+                onchange="handleAiFileAttach(event)"
+              />
+            </div>
+          </div>
+
+          <!-- ── TRANSLATE ── -->
+          <div id="page-translate" class="page">
+            <div class="page-title">
+              <span class="dot"></span><span>LANGUAGE TRANSLATOR</span>
+            </div>
+            <div class="card">
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr auto 1fr;
+                  gap: 10px;
+                  margin-bottom: 14px;
+                  align-items: end;
+                "
+              >
+                <div class="field">
+                  <label>FROM</label>
+                  <select id="lang-from">
+                    <option value="Swahili">Swahili</option>
+                    <option value="English" selected>English</option>
+                    <option value="French">French</option>
+                    <option value="Spanish">Spanish</option>
+                    <option value="Arabic">Arabic</option>
+                    <option value="Chinese">Chinese</option>
+                    <option value="German">German</option>
+                    <option value="Portuguese">Portuguese</option>
+                    <option value="Japanese">Japanese</option>
+                    <option value="Korean">Korean</option>
+                  </select>
+                </div>
+                <button
+                  class="btn btn-sm"
+                  onclick="swapLangs()"
+                  style="margin-bottom: 0"
+                >
+                  ⇄
+                </button>
+                <div class="field">
+                  <label>TO</label>
+                  <select id="lang-to">
+                    <option value="Swahili" selected>Swahili</option>
+                    <option value="English">English</option>
+                    <option value="French">French</option>
+                    <option value="Spanish">Spanish</option>
+                    <option value="Arabic">Arabic</option>
+                    <option value="Chinese">Chinese</option>
+                    <option value="German">German</option>
+                    <option value="Portuguese">Portuguese</option>
+                    <option value="Japanese">Japanese</option>
+                    <option value="Korean">Korean</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label>TEXT TO TRANSLATE</label
+                ><textarea
+                  id="translate-input"
+                  placeholder="Write here..."
+                  rows="4"
+                ></textarea>
+              </div>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap">
+                <button class="btn btn-primary" onclick="doTranslate()">
+                  <span>✓ TRANSLATE</span>
+                </button>
+                <button class="btn" onclick="startTranslateVoice()">
+                  <span>🎙️ VOICE</span>
+                </button>
+                <button class="btn btn-sm" onclick="copyTranslation()">
+                  <span>📋 COPY</span>
+                </button>
+              </div>
+              <div
+                id="translate-loading"
+                style="
+                  display: none;
+                  text-align: center;
+                  padding: 20px;
+                  color: var(--cyan);
+                "
+              >
+                <span class="loading">⟳</span> <span>Translating...</span>
+              </div>
+              <div
+                id="translate-result"
+                style="
+                  display: none;
+                  background: rgba(0, 229, 255, 0.04);
+                  border: 1px solid var(--border);
+                  border-radius: 12px;
+                  padding: 16px;
+                  margin-top: 14px;
+                "
+              >
+                <div class="card-title">📌 TRANSLATION</div>
+                <div
+                  id="translate-output"
+                  style="
+                    line-height: 1.8;
+                    color: var(--text);
+                    white-space: pre-wrap;
+                    font-size: 13px;
+                  "
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── ABOUT ── -->
+          <div id="page-about" class="page">
+            <div class="page-title">
+              <span class="dot"></span><span>ABOUT DAXON</span>
+            </div>
+
+            <div class="card">
+              <div class="card-title">🚀 DAXON AI — YOUR STUDY ASSISTANT</div>
+              <div
+                style="color: var(--text); font-size: 13px; line-height: 1.9"
+              >
+                DAXON AI is a modern digital platform built by
+                <b style="color: var(--cyan)">Daxon Technology</b>, designed to
+                help every student and small business owner in Tanzania study
+                more easily, understand faster, and work more efficiently — with
+                no extra costs and no API keys required.
+              </div>
+              <div
+                style="
+                  color: var(--text2);
+                  font-size: 12px;
+                  line-height: 1.9;
+                  margin-top: 10px;
+                "
+              >
+                Every tool here — from reading documents and scanning images to
+                translating languages and summarizing information from the web —
+                runs directly in your browser, quickly and with complete
+                privacy, since all your data stays on your device.
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">🎯 OUR MISSION</div>
+              <div
+                style="color: var(--text2); font-size: 12px; line-height: 1.9"
+              >
+                To empower Tanzanian students and entrepreneurs with
+                cutting-edge technology in their own language — so education and
+                progress are never held back by cost or language barriers.
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">🔒 PRIVACY</div>
+              <div
+                style="
+                  color: var(--text2);
+                  font-size: 12px;
+                  line-height: 1.8;
+                  margin-bottom: 12px;
+                "
+              >
+                When you turn on Privacy Mode, DAXON AI will stop sending any
+                requests to the internet. Everything will run entirely on your
+                device — using only your Notes, granted phone files, and
+                uploaded files.
+              </div>
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  background: rgba(0, 229, 255, 0.05);
+                  border: 1px solid var(--border2);
+                  border-radius: 10px;
+                  padding: 12px 14px;
+                "
+              >
+                <span
+                  style="
+                    font-family: var(--font-mono);
+                    font-size: 11px;
+                    color: var(--cyan);
+                  "
+                  >Privacy Mode</span
+                >
+                <label class="switch">
+                  <input
+                    type="checkbox"
+                    id="privacy-toggle"
+                    onchange="togglePrivacyMode()"
+                  />
+                  <span class="slider"></span>
+                </label>
+              </div>
+              <div
+                id="privacy-status-text"
+                style="
+                  color: var(--text3);
+                  font-size: 10px;
+                  font-family: var(--font-mono);
+                  margin-top: 8px;
+                "
+              ></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">👤 ACCOUNT INFO</div>
+              <div id="about-account-info"></div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">⚙️ AVAILABLE FEATURES</div>
+              <div
+                style="
+                  color: var(--text2);
+                  font-family: var(--font-mono);
+                  font-size: 11px;
+                  line-height: 2.2;
+                "
+              >
+                <div>🚀 DAXON Study Platform v3.0</div>
+                <div>📅 Build: 2026</div>
+                <div style="color: var(--green)">
+                  ✅ DAXON AI — Instant Summaries & Answers (No API Key)
+                </div>
+                <div style="color: var(--green)">
+                  ✅ Fetch Info Online (Wikipedia, DuckDuckGo, Google, Bing)
+                </div>
+                <div style="color: var(--green)">
+                  ✅ Upload Files/Images to AI (Auto-Detect Intent)
+                </div>
+                <div style="color: var(--green)">
+                  ✅ Document Reader (PDF, DOCX, PPTX, XLSX)
+                </div>
+                <div style="color: var(--green)">
+                  ✅ Camera Full Access + OCR
+                </div>
+                <div style="color: var(--green)">
+                  ✅ Language Translation (10+ Languages)
+                </div>
+                <div style="color: var(--green)">
+                  ✅ My Summaries (Save Automatically)
+                </div>
+                <div style="color: var(--green)">
+                  ✅ Schedule & Reminders (Push Notifications)
+                </div>
+                <div style="color: var(--green)">✅ Notes Manager</div>
+                <div style="color: var(--green)">
+                  ✅ Phone File Access for AI
+                </div>
+                <div style="color: var(--green)">
+                  ✅ Language Switch: English / Kiswahili
+                </div>
+                <div style="color: var(--green)">✅ Privacy Mode (ON/OFF)</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">🏢 DAXON TECHNOLOGY</div>
+              <div
+                style="color: var(--text2); font-size: 12px; line-height: 1.9"
+              >
+                Daxon Technology is a technology company based in Mbeya,
+                Tanzania, offering software development, graphic design, IT
+                support, and electronics repair services. DAXON AI is one of our
+                products aimed at bringing positive change to students and
+                entrepreneurs.
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title">🗄️ DATABASE INFO</div>
+              <div
+                id="db-info"
+                style="
+                  color: var(--text2);
+                  font-family: var(--font-mono);
+                  font-size: 11px;
+                  line-height: 2;
+                "
+              ></div>
+            </div>
+          </div>
+        </div>
+        <!-- /content -->
+      </div>
+      <!-- /layout -->
+    </div>
+    <!-- /app -->
+
+    <!-- Hidden inputs -->
+    <input
+      type="file"
+      id="file-import-input"
+      style="display: none"
+      accept=".txt,.pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.json,.csv,.md,.png,.jpg,.jpeg,.webp"
+      onchange="handleFileImport(event)"
+    />
+    <input
+      type="file"
+      id="sum-voice-input"
+      style="display: none"
+      accept="audio/*"
+    />
+    <input
+      type="file"
+      id="phone-file-picker-input"
+      style="display: none"
+      multiple
+      accept=".txt,.md,.csv,.json,.pdf,.docx,.doc,.pptx,.ppt,.xlsx,.xls,.png,.jpg,.jpeg,.webp"
+      onchange="handlePhoneFilePicker(event)"
+    />
+    <input
+      type="file"
+      id="phone-folder-picker-input"
+      style="display: none"
+      multiple
+      webkitdirectory
+      onchange="handlePhoneFilePicker(event)"
+    />
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="./js/script.js"></script>
+  </body>
+</html>
